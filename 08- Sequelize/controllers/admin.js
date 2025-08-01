@@ -8,9 +8,16 @@ exports.getAddProductPage = (req, res, next) => {
             currentPage: 'add-product' }); // Render add-product view with a title and CSS
 }
 exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
-    const product = new Product(req.body.title,req.body.imageUrl, req.body.description, req.body.price);
-    product.save()
-    .then(() =>{
+    Product.create({
+        title: req.body.title,
+        imageUrl: req.body.imageUrl,
+        description: req.body.description,
+        price: req.body.price
+    }) // this will create a new product in the database directly using Sequelize
+    .then((result) =>{
+        // @ts-ignore
+        console.log(`Product ${req.body.title} added successfully to the database`);
+        console.log(result);
         res.redirect('/'); // Redirect to shop page after adding product
     })
     .catch(err=>{
@@ -24,14 +31,15 @@ exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
 };
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
-    .then(([rows, fieldData]) => {
+    Product.findAll()
+    .then((products) => {
+        const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
         res.render('admin/products', {
-        products: rows,
-        pageTitle: 'Admin Products',
-        hasProducts: Array.isArray(rows) && rows.length > 0,
-        productCss: true,
-        currentPage: 'admin-products'
+            products: plainProducts,
+            pageTitle: 'Admin Products',
+            hasProducts: plainProducts.length > 0,
+            productCss: true,
+            currentPage: 'admin-products'
     });
     })
     .catch(err=>{
@@ -53,31 +61,63 @@ exports.postDeleteProduct = (req,res,next)=>{
 
 exports.getEditProductPage = (req,res,next)=>{
     const productId = req.params.productId;
-    const product = Product.loadProduct(productId);
-    res.render('admin/edit-product',{
-        product: product,
+    Product.findByPk(productId)
+    .then((product)=>{
+        if(!product) {
+            return res.status(404).render('404', {
+                pageTitle: 'Product Not Found',
+                currentPage: 'error'
+            });
+        }
+        const plainProduct = product.toJSON(); // Convert Sequelize instance to plain object
+        res.render('admin/edit-product',{
+        product: plainProduct,
         pageTitle: 'Edit Product',
         editProductCss:true
-
+    });
+    })
+    .catch(err=>{
+        console.log('Error fetching product for editing:', err);
+        res.status(500).render('500',{
+            pageTitle: 'Error',
+        });
     });
 };
 
+
+
+
+
 exports.postEditProduct = (req, res, next) => {
     const productId = req.params.productId;
-    const products = Product.fetchAll();
-    const existingProductIndex = products.findIndex(p => p.id === productId);
-    if (existingProductIndex !== -1) {
-        const updatedProduct = new Product(
-            req.body.title,
-            req.body.imageUrl,
-            req.body.description,
-            req.body.price
-        );
-        updatedProduct.id = productId; // Set the ID of the updated product
-        Product.updateProduct(productId, updatedProduct);
-        
-    
-      
-    }
-    res.redirect('/admin/products');
+    // const products = Product.fetchAll();
+    Product.findByPk(productId)
+    .then((product)=>{
+        if(!product) {
+            return res.status(404).render('404', {
+                pageTitle: 'Product Not Found',
+                currentPage: 'error'
+            });
+        }
+        // @ts-ignore
+        product.title = req.body.title;
+         // @ts-ignore
+        product.imageUrl = req.body.imageUrl;
+         // @ts-ignore
+        product.description = req.body.description;
+         // @ts-ignore
+        product.price = req.body.price;
+        return product.save(); // Save the updated product
+    })
+    .then(()=>{
+        res.redirect('/admin/products');
+    })
+    .catch(err =>{ // catch will handle both findByPk and save errors
+        console.error('Error fetching products:', err);
+        res.status(500).render('500', {
+            pageTitle: 'Error',
+            currentPage: 'error',
+            errorMessage: 'An error occurred while updating the product.'
+        });
+    }); 
 };

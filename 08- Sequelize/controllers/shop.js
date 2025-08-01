@@ -4,12 +4,13 @@ const Cart = require('../models/cart'); // Import Cart model
 
 exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the url must match exactly
     // send products to the shop page
-    Product.fetchAll()
-    .then(([rows, fieldData])=>{
+    Product.findAll()
+    .then((products)=>{
+        const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
         res.render('shop/product-list',{
-            products: rows,
+            products: plainProducts,
             pageTitle: 'Shop',
-            hasProducts: Array.isArray(rows) && rows.length > 0,
+            hasProducts: plainProducts.length > 0,
             productCss:true,
             formCss: 'add-product.css',
             currentPage: 'products'
@@ -22,17 +23,17 @@ exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the
             currentPage: 'error'
         });
     });
-
 };
 
 
 exports.getIndexPage = (req,res,next)=>{
-    Product.fetchAll()
-    .then(([rows, fieldData]) =>{
+    Product.findAll()
+    .then((products) =>{
+        const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
         res.render('shop/index',{
             pageTitle: 'Home page',
-            products: rows,
-            hasProducts: Array.isArray(rows) && rows.length > 0,
+            products: plainProducts,
+            hasProducts: plainProducts.length > 0,
             currentPage:'index',
             productCss:true
 
@@ -48,6 +49,9 @@ exports.getIndexPage = (req,res,next)=>{
     
 };
 
+
+
+
 exports.getCart = (req,res,next)=>{
     const cart = Cart.getCartInstance();
     res.render('shop/cart',{ 
@@ -62,19 +66,17 @@ exports.getCart = (req,res,next)=>{
 
 exports.postCart = (req,res,next)=>{
     const productId =req.body.productId; // Get the product ID from the request body
-    Product.loadProduct(productId)
-    .then(([rows, fieldData])=>{
-        if(!rows || !Array.isArray(rows) || rows.length === 0){
+    Product.findByPk(productId)
+    .then((product)=>{
+        if(!product) {
             return res.status(404).render('404', {
                 pageTitle: 'Product Not Found',
                 currentPage: 'error'
             });
         }
-        const product = rows[0];
-        // @ts-ignore
-        // const productPrice = product.price; // Get the product price from the loaded product
+        const plainProduct = product.toJSON();
         const cart = Cart.getCartInstance();
-        cart.addProductToCart(product); // Add product to cart
+        cart.addProductToCart(plainProduct); // Add product to cart
         res.redirect('/cart'); // Redirect to the cart page after adding product
     })
     .catch(err=>{
@@ -90,13 +92,14 @@ exports.postCart = (req,res,next)=>{
 
 
 exports.getCheckout = (req,res,next)=>{
-    Product.fetchAll()
+    Product.findAll()
     .then(products=>{
+        const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
         res.render('shop/checkout',{
             pageTitle: 'Checkout',
-            products: products,
+            products: plainProducts,
             currentPage: 'checkout',
-            hasProducts: products.length > 0,
+            hasProducts: plainProducts.length > 0,
             productCss: true
         });
     })
@@ -121,19 +124,19 @@ exports.getOrders = (req,res,next)=>{
 
 exports.getProductDetails = (req, res, next) => {
         const productId = req.params.productId;
-        Product.loadProduct(productId)
-        .then(([rows, fieldData])=>{
-            if(!rows || !Array.isArray(rows) || rows.length === 0) {
+        Product.findByPk(productId)
+        .then((product)=>{
+            const plainProduct = product.toJSON();
+            if(!product) {
                 return res.status(404).render('404', {
                     pageTitle: 'Product Not Found',
                     currentPage: 'error'
                 });
             }
-            const product = rows[0];
             res.render('shop/product-details',{
-                product: product,
+                product: plainProduct,
                 // @ts-ignore
-                pageTitle: product.title,
+                pageTitle: plainProduct.title,
                 productDetailsCss: true,
                 currentPage: 'product-details'
             }); 
