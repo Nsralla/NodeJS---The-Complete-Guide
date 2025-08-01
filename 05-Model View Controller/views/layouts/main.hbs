@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{pageTitle}}</title>
+    {{#if formCss}}
+        <link rel="stylesheet" href="/css/{{formCss}}">
+    {{/if}}
+    {{#if productCss}}
+        <link rel="stylesheet" href="/css/shop.css">
+    {{/if}}
+    {{#if productDetailsCss}}
+        <link rel="stylesheet" href="/css/product-details.css">
+    {{/if}}
+    {{#if page404}}
+        <link rel="stylesheet" href="/css/404.css">
+    {{/if}}
+  
+
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/shop">Shop</a></li>
+                <li><a href="/admin/add-product">Add Product</a></li>
+            </ul>
+        </nav>
+
+    </header>
+
+    <main>
+        {{{body}}}
+    </main>
+
+</body>
+
+</html>

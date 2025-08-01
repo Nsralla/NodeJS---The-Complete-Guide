@@ -1,0 +1,21 @@
+<main> 
+       <h1> My products</h1>
+       {{#if hasProducts}}
+           <p>Here are your products:</p>
+       {{else}}
+           <p>No products found. Please add some products.</p>
+       {{/if}}
+       
+       {{#if errorMessage}}
+           <p class="error">{{errorMessage}}</p>
+       {{/if}}
+
+       {{#if successMessage}}
+           <p class="success">{{successMessage}}</p>
+       {{/if}}
+       <ul>
+           {{#each products}}
+               <li>{{this.title}}</li>
+           {{/each}}
+       </ul>
+</main>

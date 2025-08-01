@@ -1,0 +1,37 @@
+ body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        main{
+            padding: 20px;
+        }
+        .main-header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        .main-header__nav {
+            display: flex;
+            justify-content: space-between;
+        }
+        .main-header__nav-list {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        .main-header__item {
+            display: inline;
+            margin-right: 20px;
+        }
+        .main-header__item a {
+            color: white;
+            text-decoration: none;
+        }
+        .main-header__nav-list a:hover {
+            color: #ccc;
+        }
+      
+        .main-header__item.active a {
+            color: #1d0202;
+        }
