@@ -40,3 +40,5 @@ app.use(express.static(path.join(__dirname, 'public'))); // Serve static files f
 
 
 // to run the code:  npx nodemon "06-Enhancing the app/app.js"
+
+npm install --save sequelize
