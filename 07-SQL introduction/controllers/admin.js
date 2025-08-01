@@ -9,18 +9,39 @@ exports.getAddProductPage = (req, res, next) => {
 }
 exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
     const product = new Product(req.body.title,req.body.imageUrl, req.body.description, req.body.price);
-    product.save();
-    res.redirect('/'); // Redirect to shop page after adding product
+    product.save()
+    .then(() =>{
+        res.redirect('/'); // Redirect to shop page after adding product
+    })
+    .catch(err=>{
+        console.error('Error saving product:', err);
+        res.status(500).render('500', {
+            pageTitle: 'Error',
+            currentPage: 'error'
+        });
+    });
+ 
 };
 
 exports.getProducts = (req, res, next) => {
-    res.render('admin/products', {
-        products: Product.fetchAll(),
+    Product.fetchAll()
+    .then(([rows, fieldData]) => {
+        res.render('admin/products', {
+        products: rows,
         pageTitle: 'Admin Products',
-        hasProducts: Product.fetchAll().length > 0,
+        hasProducts: Array.isArray(rows) && rows.length > 0,
         productCss: true,
         currentPage: 'admin-products'
     });
+    })
+    .catch(err=>{
+        console.error('Error fetching products:', err);
+        res.status(500).render('500', {
+            pageTitle: 'Error',
+            currentPage: 'error'
+        });
+    });
+  
 };
 
 exports.postDeleteProduct = (req,res,next)=>{

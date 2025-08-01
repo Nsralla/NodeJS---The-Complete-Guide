@@ -1,5 +1,5 @@
 const products = [];
-
+const db = require('../util/database'); // Assuming you have a database utility for database operations
 class Product {
     constructor(title, imageUrl, description, price) {
         this.title = title;
@@ -9,8 +9,7 @@ class Product {
     }
 
     save(){
-        this.id = Math.random().toString(); // Generate a random ID for the product
-        products.push(this);
+        return db.execute(`INSERT INTO products (title, imageUrl, description, price) values(?,?,?,?)`, [this.title, this.imageUrl, this.description, this.price])
     }
 
     static updateProduct(id, updatedProduct) {
@@ -24,13 +23,29 @@ class Product {
         if (productIndex !== -1) {
             products.splice(productIndex, 1);
         }
+
     }
     static loadProduct(id){
-        return products.find(p => p.id === id);
+        // return products.find(p => p.id === id);
+       return db.execute(`SELECT * FROM products where id = ?`,[id])
+        .then(result=>{
+           return result;
+        })
+        .catch(err=>{
+            console.error('Error loading product:', err);
+            throw err; // Propagate the error
+        });
     }
 
     static fetchAll(){
-        return products;
+        return db.execute('SELECT * FROM products')
+        .then(result=>{
+            return result;
+        })
+        .catch(err=>{
+            console.error('Error fetching products:', err);
+            throw err; // Propagate the error
+        });
     }
 
 };

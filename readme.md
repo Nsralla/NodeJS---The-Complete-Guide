@@ -21,7 +21,7 @@ package.json content:
  npm install --save ejs pug express-handlebars
  to install package for html dynamic rendering
 
-
+npm install --save mysql2        to  install mysql (production dependancy)
 
  const express = require('express');
 const expressHbs = require('express-handlebars');

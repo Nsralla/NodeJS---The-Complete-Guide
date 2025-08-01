@@ -1,5 +1,6 @@
 const express = require('express');
 const expressHbs = require('express-handlebars');
+const db = require('./util/database.js'); // Import the database connection
 const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -20,10 +21,10 @@ const hbs = expressHbs.create({
     eq: (a, b) => a === b
   }
 });
+
+
 // Configure handlebars engine
 app.engine('hbs', hbs.engine); // Register the handlebars engine with the app
-
-// Register eq helper
 
 app.set('view engine', 'hbs'); // Set handlebars as the templating engine
 app.set('views',  path.join(__dirname, 'views')); // Set the views directory for handlebars templates
