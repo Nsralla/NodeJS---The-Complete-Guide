@@ -11,40 +11,23 @@ class Cart {
         return Cart.instance;
     }
 
-    addProductToCart(productId, productPrice){
+    addProductToCart(product){
         // check if the product already exists in the cart
-        const existingProductIndex = this.products.findIndex(prd => prd.id === productId);
+        const existingProductIndex = this.products.findIndex(prd => prd.id === product.id);
         if(existingProductIndex === -1){
             // if not, add the product to the cart
-
-            Product.loadProduct(productId)
-            .then(([rows, fieldData])=>{
-                if(!rows || !Array.isArray(rows) || rows.length === 0){
-                    console.error(`Product with ID ${productId} not found.`);
-                    return;
-                }
-                const productData = rows[0]; // Assuming rows is an array and we want the first product
-                if(productData){
-                    const newProduct = { ...productData, quantity: 1 }; // Create a new object with quantity
-                    this.products.push(newProduct);
-                    this.totalPrice += Number(productPrice); // Update total price
-                }
-                else{
-                    console.error(`Product with ID ${productId} not found.`);
-                }
-            })
-            .catch(err => {
-                console.error(`Error loading product with ID ${productId}:`, err);
-            });
-
+            const newProduct = { ...product, quantity: 1 }; // Create a new object with quantity
+            this.products.push(newProduct);
+            this.totalPrice += Number(product.price); // Update total price
         }
+
         // if it exists, increment the quantity and update total price
         else{
-            const existingProduct = this.products.find(prd=>prd.id === productId);
-            existingProduct.quantity+=1;
-            this.products[existingProductIndex] = existingProduct; // Update the product in the cart
-            this.totalPrice += Number(productPrice); // Update total price
-        }
+                const existingProduct = this.products.find(prd=>prd.id === product.id);
+                existingProduct.quantity+=1;
+                this.products[existingProductIndex] = existingProduct; // Update the product in the cart
+                this.totalPrice += Number(product.price); // Update total price
+            }
     }
 
     removeProductFromCart(productId){

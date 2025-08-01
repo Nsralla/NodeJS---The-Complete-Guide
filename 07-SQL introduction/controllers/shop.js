@@ -72,9 +72,9 @@ exports.postCart = (req,res,next)=>{
         }
         const product = rows[0];
         // @ts-ignore
-        const productPrice = product.price; // Get the product price from the loaded product
+        // const productPrice = product.price; // Get the product price from the loaded product
         const cart = Cart.getCartInstance();
-        cart.addProductToCart(productId, productPrice); // Add product to cart
+        cart.addProductToCart(product); // Add product to cart
         res.redirect('/cart'); // Redirect to the cart page after adding product
     })
     .catch(err=>{
