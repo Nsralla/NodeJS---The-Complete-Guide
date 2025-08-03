@@ -221,7 +221,34 @@ exports.getProductDetails = (req, res, next) => {
 
 exports.deleteProductFromCart = (req,res,next)=>{
     const id = req.params.productId;
-    const cart = Cart.getCartInstance();
-    cart.removeProductFromCart(id);
-    res.redirect('/cart'); // Redirect to the cart page after deletion
+    req.user.getCart()
+    .then(cart=>{
+        if(!cart){
+            return res.status(404).render('404', {
+                pageTitle: 'Cart Not Found',
+                currentPage: 'error'
+            });
+        }
+        return cart.getProducts({where:{id:id}});
+    }).then(products=>{
+        const product = products[0];
+        if(!product){
+            return res.status(404).render('404', {
+                pageTitle: 'Product Not Found',
+                currentPage: 'error'
+            });
+        }
+        return product.cartItem.destroy(); // Remove the product from the cart
+    })
+    .then(() => {
+        res.redirect('/cart');
+    })
+    .catch(err => {
+        console.error('Error fetching cart:', err);
+        res.status(500).render('500', {
+            pageTitle: 'Error',
+            currentPage: 'error'
+        });
+    });
+    
 };
