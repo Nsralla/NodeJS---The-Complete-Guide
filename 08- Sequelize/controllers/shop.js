@@ -1,6 +1,6 @@
 const Product = require('../models/product'); // Import Product model
 const Cart = require('../models/cart'); // Import Cart model
-
+const Order = require('../models/order'); // Import Order model
 
 exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the url must match exactly
     // send products to the shop page
@@ -178,12 +178,6 @@ exports.getCheckout = (req,res,next)=>{
 
 };
 
-exports.getOrders = (req,res,next)=>{
-    res.render('shop/orders',{
-        pageTitle: 'Your Orders',
-        currentPage: 'orders'
-    });
-};
 
 
 
@@ -251,4 +245,88 @@ exports.deleteProductFromCart = (req,res,next)=>{
         });
     });
     
+};
+
+exports.postOrder = (req, res, next) => {
+    let fetchedCart;
+    let fetchedProducts;
+
+    req.user.getCart()
+        .then(cart => {
+            if (!cart) {
+                return res.status(404).render('404', {
+                    pageTitle: 'Cart Not Found',
+                    currentPage: 'error'
+                });
+            }
+            fetchedCart = cart;
+            return cart.getProducts();
+        })
+        .then(products => {
+            if (!products || products.length === 0) {
+                return res.status(400).render('400', {
+                    pageTitle: 'No Products in Cart',
+                    currentPage: 'error'
+                });
+            }
+            fetchedProducts = products;
+            return req.user.createOrder(); // Sequelize auto-assigns userId
+        })
+        .then(order => {
+            const addProductPromises = fetchedProducts.map(product => {
+                return order.addProduct(product, {
+                    through: { quantity: product.cartItem.quantity }
+                });
+            });
+            return Promise.all(addProductPromises).then(() => order);
+        })
+        .then(() => {
+            return fetchedCart.setProducts([]); // Clear the cart
+        })
+        .then(() => {
+            res.redirect('/orders');
+        })
+        .catch(err => {
+            console.error('Error creating order:', err);
+            res.status(500).render('500', {
+                pageTitle: 'Error',
+                currentPage: 'error'
+            });
+        });
+};
+
+
+
+exports.getOrders = (req, res, next) => {
+    req.user.getOrders({ 
+        include: ['products'] // Include associated products
+    })
+    .then(orders => {
+        const plainOrders = orders.map(order => {
+            const plainOrder = order.toJSON();
+            // Process products to include quantity from OrderItem
+            if (plainOrder.products) {
+                plainOrder.products = plainOrder.products.map(product => {
+                    // The quantity is stored in the junction table (OrderItem)
+                    product.quantity = product.orderItem.quantity;
+                    return product;
+                });
+            }
+            return plainOrder;
+        });
+
+        res.render('shop/orders', {
+            pageTitle: 'Your Orders',
+            currentPage: 'orders',
+            orders: plainOrders,
+            orderCss:true
+        });
+    })
+    .catch(err => {
+        console.error('Error fetching orders:', err);
+        res.status(500).render('500', {
+            pageTitle: 'Error',
+            currentPage: 'error'
+        });
+    });
 };

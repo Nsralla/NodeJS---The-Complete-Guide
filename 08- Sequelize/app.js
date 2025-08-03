@@ -6,6 +6,8 @@ const Product = require('./models/product'); // Import the Product model
 const User = require('./models/user'); // Import the User model
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-items'); // Import the CartItem model
+const Order = require('./models/order'); // Import the Order model
+const OrderItem = require('./models/order-item'); // Import the OrderItem model
 const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -65,7 +67,12 @@ Cart.belongsTo(User); // A Cart belongs to a User
 //3- Many to Many relationship between Cart and Product
 Cart.belongsToMany(Product, { through: CartItem });
 Product.belongsToMany(Cart, { through: CartItem });
-
+//4- One to Many relationship between Order and User
+User.hasMany(Order);
+Order.belongsTo(User);
+// 5- Many to Many relationship between Order and Product
+Order.belongsToMany(Product, { through: OrderItem }); // Many to Many relationship between Order and Product
+Product.belongsToMany(Order, { through: OrderItem });
 
 
 

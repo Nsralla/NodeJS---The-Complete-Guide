@@ -15,7 +15,12 @@
             </form>
         </li>
         {{/each}}
+
     </ul>
+        <form action="/create-order" method="POST">
+            <button class="cart-checkout-btn" type="submit">Order now</button>
+        </form>
+
     {{else}}
     <p class="cart-empty-message">Your cart is empty.</p>
     {{/if}}
