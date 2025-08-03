@@ -8,13 +8,14 @@ exports.getAddProductPage = (req, res, next) => {
             currentPage: 'add-product' }); // Render add-product view with a title and CSS
 }
 exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
-    Product.create({
+
+    req.user.createProduct({
         title: req.body.title,
         imageUrl: req.body.imageUrl,
         description: req.body.description,
-        price: req.body.price
-    }) // this will create a new product in the database directly using Sequelize
-    .then((result) =>{
+        price: req.body.price,
+        userId:req.user.id
+    }).then((result) =>{
         // @ts-ignore
         console.log(`Product ${req.body.title} added successfully to the database`);
         console.log(result);
@@ -27,11 +28,38 @@ exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
             currentPage: 'error'
         });
     });
+
+//or
+
+    // Product.create({
+    //     title: req.body.title,
+    //     imageUrl: req.body.imageUrl,
+    //     description: req.body.description,
+    //     price: req.body.price,
+    //     userId:req.user.id
+    // }) // this will create a new product in the database directly using Sequelize
+    // .then((result) =>{
+    //     // @ts-ignore
+    //     console.log(`Product ${req.body.title} added successfully to the database`);
+    //     console.log(result);
+    //     res.redirect('/'); // Redirect to shop page after adding product
+    // })
+    // .catch(err=>{
+    //     console.error('Error saving product:', err);
+    //     res.status(500).render('500', {
+    //         pageTitle: 'Error',
+    //         currentPage: 'error'
+    //     });
+    // });
  
 };
 
 exports.getProducts = (req, res, next) => {
-    Product.findAll()
+    Product.findAll({
+        where:{
+            userId:req.user.id
+        }
+    })
     .then((products) => {
         const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
         res.render('admin/products', {
@@ -54,14 +82,31 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req,res,next)=>{
     const productId = req.params.productId; // Get the product title from the request parameters
-    Product.delete(productId);
-    res.redirect('/admin/products'); // Redirect to the admin products page after deletion
-    
+    Product.destroy(
+        {where:
+            {id:productId,
+             userId:req.user.id // Ensure the product belongs to the user
+            }})
+    .then(result=>{
+        console.log(`Product with ID ${productId} deleted successfully`);
+        res.redirect('/admin/products'); // Redirect to the admin products page after deletion
+    })
+    .catch(err=>{
+        console.error('Error deleting product:', err);
+        res.status(500).render('500',{
+            pageTitle: 'Error',
+        });
+    });    
 }
 
 exports.getEditProductPage = (req,res,next)=>{
     const productId = req.params.productId;
-    Product.findByPk(productId)
+    Product.findOne({
+        where:{
+            id:productId,
+            userId:req.user.id
+        }
+    })
     .then((product)=>{
         if(!product) {
             return res.status(404).render('404', {
@@ -91,7 +136,12 @@ exports.getEditProductPage = (req,res,next)=>{
 exports.postEditProduct = (req, res, next) => {
     const productId = req.params.productId;
     // const products = Product.fetchAll();
-    Product.findByPk(productId)
+    Product.findOne({
+        where:{
+            id: productId,
+            userId:req.user.id
+        }
+    })
     .then((product)=>{
         if(!product) {
             return res.status(404).render('404', {
@@ -107,7 +157,7 @@ exports.postEditProduct = (req, res, next) => {
         product.description = req.body.description;
          // @ts-ignore
         product.price = req.body.price;
-        return product.save(); // Save the updated product
+        return product.save(); // Save the updated product, it will return a promise, so we have to handle it inside then
     })
     .then(()=>{
         res.redirect('/admin/products');

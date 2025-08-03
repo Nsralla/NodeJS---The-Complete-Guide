@@ -1,16 +1,18 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
-const Cart = sequelize.define('cart',{
-    id:{
+const CartItem = sequelize.define('cartItem', {
+    id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
+    },
+    quantity:{
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1
     }
 });
 
-module.exports = Cart;
-
-// cart has many to many relationship with product
-// cart has a one to one relationship with user
+module.exports = CartItem;

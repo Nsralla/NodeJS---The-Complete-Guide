@@ -152,11 +152,11 @@ exports.getProductDetails = (req, res, next) => {
 };
 
 
-exports.deleteProduct = (req,res,next)=>{
-    const id = req.params.productId;
-    Product.delete(id);
-    res.redirect('/products'); // Redirect to the products page after deletion
-};
+// exports.deleteProduct = (req,res,next)=>{
+//     const id = req.params.productId;
+//     Product.delete(id);
+//     res.redirect('/products'); // Redirect to the products page after deletion
+// };
 
 
 exports.deleteProductFromCart = (req,res,next)=>{

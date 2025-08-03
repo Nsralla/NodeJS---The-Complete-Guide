@@ -8,7 +8,7 @@ const shopController = require('../controllers/shop');
 // http://localhost:3000/ GET reqest TO DSIAPLY all products
 router.get('/', shopController.getIndexPage);
 router.get('/products', shopController.getShowProducts);
-router.get('/products/delete/:productId', shopController.deleteProduct);
+// router.get('/products/delete/:productId', shopController.deleteProduct);
 router.get('/products/:productId', shopController.getProductDetails); // GET request to display product details
 router.get('/cart', shopController.getCart);
 router.post('/cart',shopController.postCart);  // add product to cart
