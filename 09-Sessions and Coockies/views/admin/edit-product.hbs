@@ -1,0 +1,58 @@
+<div class="edit-product-container">
+    <div class="edit-product-header">
+        <h1 class="edit-product-title">Edit Product</h1>
+        <p class="edit-product-subtitle">Update your product information</p>
+    </div>
+
+    <form class="edit-product-form" action="/admin/edit-product/{{product.id}}" method="POST">
+        <div class="form-group">
+            <label class="form-label" for="title">
+                <i class="label-icon">📝</i>
+                Product Title
+            </label>
+            <input class="form-input" type="text" id="title" name="title" placeholder="Enter product title"
+                value="{{product.title}}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="imageUrl">
+                <i class="label-icon">🖼️</i>
+                Image URL
+            </label>
+            <input class="form-input" type="url" id="imageUrl" name="imageUrl"
+                placeholder="https://example.com/image.jpg" value="{{product.imageUrl}}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">
+                <i class="label-icon">📄</i>
+                Description
+            </label>
+            <textarea class="form-textarea" id="description" name="description"
+                placeholder="Describe your product in detail..." rows="4" required>{{product.description}}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="price">
+                <i class="label-icon">💰</i>
+                Price
+            </label>
+            <div class="price-input-wrapper">
+                <span class="currency-symbol">$</span>
+                <input class="form-input price-input" type="number" id="price" name="price" placeholder="0.00"
+                    value="{{product.price}}" step="0.01" min="0" required>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="btn-icon">✨</i>
+                Update Product
+            </button>
+            <a href="/admin/products" class="btn btn-secondary">
+                <i class="btn-icon">❌</i>
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
