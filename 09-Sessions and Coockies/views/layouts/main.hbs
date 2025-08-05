@@ -44,17 +44,20 @@
                
                 {{#if isAuthenticated}}
                     <li class="{{#if (eq currentPage 'index')}}active{{/if}}"><a href="/">Shop</a></li>
-                    <li class="{{#if (eq currentPage 'logout')}}active{{/if}}"><a href="/logout">Logout</a></li>
                     <li class="{{#if (eq currentPage 'add-product')}}active{{/if}}"><a href="/admin/add-product">Add Product</a></li>
-                    <li class="{{#if (eq currentPage 'products')}}active{{/if}}"><a href="/products">Products</a></li>
+                    {{!-- <li class="{{#if (eq currentPage 'products')}}active{{/if}}"><a href="/products">Products</a></li> --}}
                     <li class="{{#if (eq currentPage 'cart')}}active{{/if}}"><a href="/cart">Cart</a></li>
                     <li class="{{#if (eq currentPage 'orders')}}active{{/if}}"><a href="/orders">Orders</a></li>
                     <li class="{{#if (eq currentPage 'admin-products')}}active{{/if}}"><a href="/admin/products">Admin Products</a></li>
+                    <li>
+                        <form action="/logout" method="POST">
+                            <button type="submit">Logout</button>
+                        </form>
+                    </li>
             </ul>
                 {{else}}
                  <li class="{{#if (eq currentPage 'index')}}active{{/if}}"><a href="/">Shop</a></li>
-                    <li class="{{#if (eq currentPage 'logout')}}active{{/if}}"><a href="/logout">Logout</a></li>
-                    <li class="{{#if (eq currentPage 'products')}}active{{/if}}"><a href="/products">Products</a></li>
+                    {{!-- <li class="{{#if (eq currentPage 'products')}}active{{/if}}"><a href="/products">Products</a></li> --}}
                     <li class="{{#if (eq currentPage 'cart')}}active{{/if}}"><a href="/cart">Cart</a></li>
                     <li class="{{#if (eq currentPage 'orders')}}active{{/if}}"><a href="/orders">Orders</a></li>
                      <li class="{{#if (eq currentPage 'login')}}active{{/if}} ">

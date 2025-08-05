@@ -1,5 +1,4 @@
-
-       <h1> My products</h1>
+<h1> My products</h1>
        {{#if hasProducts}}
            <br>
        {{else}}
@@ -20,9 +19,13 @@
                 <p>{{this.description}}</p>
                 <img src="{{this.imageUrl}}" alt="{{this.title}}">
                 <p>Price: ${{this.price}}</p>
-                  <form class="product-details__cart-form" action="/cart" method="POST">
+                <form class="product-details__cart-form" action="/cart" method="POST">
+                  {{#if ../isAuthenticated}}
                     <button class="btn product-details__cart-btn" type="submit">Add to Cart</button>
                     <input type="hidden" name="productId" value="{{this.id}}">
+                  {{else}}
+                    <p>Please log in to add products to your cart.</p>
+                  {{/if}}
                 </form>
                 <a href="/products/{{this.id}}">Details</a>
                </li>

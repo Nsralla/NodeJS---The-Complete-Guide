@@ -15,25 +15,39 @@ const MongoDbStore = require('connect-mongodb-session')(session); // Import Mong
 
 const adminRoutes = require('./routes/admin').router;
 const shopRoutes = require('./routes/shop').router;
-const authRoutes = require('./routes/auth'); 
+const authRoutes = require('./routes/auth');
 
 
 const app = express();
 const store = new MongoDbStore({
-    uri: 'mongodb://localhost:27017/sessions', // MongoDB connection URI
-    collection: 'sessions' // Collection name for storing sessions
+  uri: 'mongodb://localhost:27017/sessions',
+  collection: 'sessions'
 });
+
+// Add error handling for the store
+store.on('error', function (error) {
+  console.log('Session store error:', error);
+});
+
+// Test the store connection
+store.on('connected', function () {
+  console.log('MongoDB session store connected successfully');
+});
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false })); // Middleware to parse URL-encoded bodies
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the public directory
 app.use(session({
-    secret: 'my secret',         // used to sign the cookie
-    resave: false,               // don’t save session if nothing changed
-    saveUninitialized: false,     // don’t save empty sessions
-    // cookie: {
-    //     maxAge: 1000 * 60 * 60 * 24 // Cookie expiration time (1 day)
-    // }
-    store: store // Use MongoDB session store
+  secret: 'my secret',
+  resave: false,
+  saveUninitialized: false,
+  store: store,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    secure: false, // Set to false for HTTP (development)
+    httpOnly: true,
+    sameSite: 'lax' // Add this for better cookie handling
+  }
 }));
 
 // Register eq helper with Handlebars engine
@@ -48,24 +62,31 @@ const hbs = expressHbs.create({
 // Configure handlebars engine
 app.engine('hbs', hbs.engine); // Register the handlebars engine with the app
 app.set('view engine', 'hbs'); // Set handlebars as the templating engine
-app.set('views',  path.join(__dirname, 'views')); // Set the views directory for handlebars templates
+app.set('views', path.join(__dirname, 'views')); // Set the views directory for handlebars templates
 
 
 
 
 // Routes
-app.use((req,res,next)=>{ // this will execute for every request
+app.use((req, res, next) => {
+  console.log('Session at top-level middleware:', req.session); // <== ADD THIS
+
   User.findByPk(1)
-  .then(user=>{
-    //@ts-ignore
-    req.user = user; // Attach the user to the request object
-    // console.log('User fetched from database:', user);
-    next(); // Call the next middleware, then it will call the request handler
-  })
-  .catch(err=>{
-    console.log("error while fetching the user with id 1" +err);
-  });
+    .then(user => {
+      if (!user) {
+        console.log('No user found with ID 1');
+        return next(); // prevent hanging if no user
+      }
+      //@ts-ignore
+      req.user = user;
+      next();
+    })
+    .catch(err => {
+      console.error("Error while fetching the user with id 1:", err);
+      next(err); // ensure the error doesn't break flow
+    });
 });
+
 app.use('/admin', adminRoutes); // Use admin routes
 app.use(shopRoutes); // Use shop routes
 app.use(authRoutes);
@@ -77,7 +98,7 @@ app.use(errorController.get404Page);
 
 // associate models (RELATIONSHIPS)
 //1- one to many relationship between User and Product (creation of products)
-Product.belongsTo(User, {constraints:true, onDelete: 'CASCADE'}); // Define the relationship between Product and User
+Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' }); // Define the relationship between Product and User
 User.hasMany(Product); // A User can have many Products
 //2- One to One relationship between User and Cart
 User.hasOne(Cart); // A User can have  one Cart
@@ -95,17 +116,17 @@ Product.belongsToMany(Order, { through: OrderItem });
 
 
 sequelize
-.sync() // Sync the database, force:true will drop the table if it exists
-.then(result=>{
-  console.log('Database synced successfully');
-  app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-  });
+  .sync() // Sync the database, force:true will drop the table if it exists
+  .then(result => {
+    console.log('Database synced successfully');
+    app.listen(3000, () => {
+      console.log('Server is running on port 3000');
+    });
 
-})
-.catch(err=>{
-  console.log(err);
-});
+  })
+  .catch(err => {
+    console.log(err);
+  });
 
 
 

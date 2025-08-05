@@ -5,53 +5,47 @@ const Order = require('../models/order'); // Import Order model
 exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the url must match exactly
     // send products to the shop page
     Product.findAll()
-    .then((products)=>{
-        const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
-        res.render('shop/product-list',{
-            products: plainProducts,
-            pageTitle: 'Shop',
-            hasProducts: plainProducts.length > 0,
-            productCss:true,
-            formCss: 'add-product.css',
-            currentPage: 'products',
-            isAuthenticated: req.isLoggedIn
+        .then((products) => {
+            const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
+            res.render('shop/product-list', {
+                products: plainProducts,
+                pageTitle: 'Shop',
+                hasProducts: plainProducts.length > 0,
+                productCss: true,
+                formCss: 'add-product.css',
+                currentPage: 'products',
+                isAuthenticated: req.session.isLoggedIn
+            });
+        })
+        .catch(err => {
+            console.error('Error fetching products:', err);
+            res.status(500).render('500', {
+                pageTitle: 'Error',
+                currentPage: 'error'
+            });
         });
-    })
-    .catch(err => {
-        console.error('Error fetching products:', err);
-        res.status(500).render('500', {
-            pageTitle: 'Error',
-            currentPage: 'error'
-        });
-    });
 };
 
+exports.getIndexPage = (req, res, next) => {
+    const isAuthenticated = req.session.isLoggedIn === true; // === true ensures real boolean
 
-exports.getIndexPage = (req,res,next)=>{
-    // PROTECT THE ROUTE
-     
     Product.findAll()
-    .then((products) =>{
-        const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
-            res.render('shop/index',{
+        .then((products) => {
+            const plainProducts = products.map(product => product.toJSON());
+            res.render('shop/index', {
                 pageTitle: 'Home page',
                 products: plainProducts,
                 hasProducts: plainProducts.length > 0,
-                currentPage:'index',
-            productCss:true
-            })
-      
-    })
-    .catch(err =>{
-        console.error('Error fetching products:', err);
-        res.status(500).render('500', {
-            pageTitle: 'Error',
-            currentPage: 'error'
+                currentPage: 'index',
+                productCss: true,
+                isAuthenticated // boolean true or false
+            });
+        })
+        .catch(err => {
+            console.error('Error fetching products:', err);
+            res.status(500).render('500');
         });
-    });
-    
 };
-
 
 
 
@@ -75,7 +69,8 @@ exports.getCart = (req, res, next) => {
                     products: [],
                     totalPrice: 0,
                     currentPage: 'cart',
-                    cartCss: true
+                    cartCss: true,
+                    isAuthenticated: req.session.isLoggedIn
                 });
             }
 
@@ -95,7 +90,7 @@ exports.getCart = (req, res, next) => {
                 totalPrice: totalPrice,
                 currentPage: 'cart',
                 cartCss: true,
-                isAuthenticated: req.isLoggedIn
+                isAuthenticated: req.session.isLoggedIn
             });
         })
         .catch(err => {
@@ -160,26 +155,26 @@ exports.postCart = (req, res, next) => {
 
 
 
-exports.getCheckout = (req,res,next)=>{
+exports.getCheckout = (req, res, next) => {
     Product.findAll()
-    .then(products=>{
-        const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
-        res.render('shop/checkout',{
-            pageTitle: 'Checkout',
-            products: plainProducts,
-            currentPage: 'checkout',
-            hasProducts: plainProducts.length > 0,
-            productCss: true,
-            isAuthenticated: req.isLoggedIn
+        .then(products => {
+            const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
+            res.render('shop/checkout', {
+                pageTitle: 'Checkout',
+                products: plainProducts,
+                currentPage: 'checkout',
+                hasProducts: plainProducts.length > 0,
+                productCss: true,
+                isAuthenticated: req.session.isLoggedIn
+            });
+        })
+        .catch(err => {
+            console.log("error fetching products for checkout:", err);
+            res.status(500).render('500', {
+                pageTitle: 'Error',
+                currentPage: 'error'
+            });
         });
-    })
-    .catch(err=>{
-        console.log("error fetching products for checkout:", err);
-        res.status(500).render('500', {
-            pageTitle: 'Error',
-            currentPage: 'error'
-        });
-    });
 
 };
 
@@ -187,26 +182,26 @@ exports.getCheckout = (req,res,next)=>{
 
 
 exports.getProductDetails = (req, res, next) => {
-        const productId = req.params.productId;
-        Product.findByPk(productId)
-        .then((product)=>{
+    const productId = req.params.productId;
+    Product.findByPk(productId)
+        .then((product) => {
             const plainProduct = product.toJSON();
-            if(!product) {
+            if (!product) {
                 return res.status(404).render('404', {
                     pageTitle: 'Product Not Found',
                     currentPage: 'error'
                 });
             }
-            res.render('shop/product-details',{
+            res.render('shop/product-details', {
                 product: plainProduct,
                 // @ts-ignore
                 pageTitle: plainProduct.title,
                 productDetailsCss: true,
                 currentPage: 'product-details',
-            isAuthenticated: req.isLoggedIn
-            }); 
+                isAuthenticated: req.session.isLoggedIn
+            });
         })
-        .catch(err=>{
+        .catch(err => {
             console.error('Error loading product details:', err);
             res.status(500).render('500', {
                 pageTitle: 'Error',
@@ -219,39 +214,39 @@ exports.getProductDetails = (req, res, next) => {
 
 
 
-exports.deleteProductFromCart = (req,res,next)=>{
+exports.deleteProductFromCart = (req, res, next) => {
     const id = req.params.productId;
     req.user.getCart()
-    .then(cart=>{
-        if(!cart){
-            return res.status(404).render('404', {
-                pageTitle: 'Cart Not Found',
+        .then(cart => {
+            if (!cart) {
+                return res.status(404).render('404', {
+                    pageTitle: 'Cart Not Found',
+                    currentPage: 'error'
+                });
+            }
+            return cart.getProducts({ where: { id: id } });
+        }).then(products => {
+            const product = products[0];
+            if (!product) {
+                return res.status(404).render('404', {
+                    pageTitle: 'Product Not Found',
+                    currentPage: 'error',
+                    isAuthenticated: req.isLoggedIn
+                });
+            }
+            return product.cartItem.destroy(); // Remove the product from the cart
+        })
+        .then(() => {
+            res.redirect('/cart');
+        })
+        .catch(err => {
+            console.error('Error fetching cart:', err);
+            res.status(500).render('500', {
+                pageTitle: 'Error',
                 currentPage: 'error'
             });
-        }
-        return cart.getProducts({where:{id:id}});
-    }).then(products=>{
-        const product = products[0];
-        if(!product){
-            return res.status(404).render('404', {
-                pageTitle: 'Product Not Found',
-                currentPage: 'error',
-               isAuthenticated: req.isLoggedIn
-            });
-        }
-        return product.cartItem.destroy(); // Remove the product from the cart
-    })
-    .then(() => {
-        res.redirect('/cart');
-    })
-    .catch(err => {
-        console.error('Error fetching cart:', err);
-        res.status(500).render('500', {
-            pageTitle: 'Error',
-            currentPage: 'error'
         });
-    });
-    
+
 };
 
 exports.postOrder = (req, res, next) => {
@@ -305,36 +300,36 @@ exports.postOrder = (req, res, next) => {
 
 
 exports.getOrders = (req, res, next) => {
-    req.user.getOrders({ 
+    req.user.getOrders({
         include: ['products'] // Include associated products
     })
-    .then(orders => {
-        const plainOrders = orders.map(order => {
-            const plainOrder = order.toJSON();
-            // Process products to include quantity from OrderItem
-            if (plainOrder.products) {
-                plainOrder.products = plainOrder.products.map(product => {
-                    // The quantity is stored in the junction table (OrderItem)
-                    product.quantity = product.orderItem.quantity;
-                    return product;
-                });
-            }
-            return plainOrder;
-        });
+        .then(orders => {
+            const plainOrders = orders.map(order => {
+                const plainOrder = order.toJSON();
+                // Process products to include quantity from OrderItem
+                if (plainOrder.products) {
+                    plainOrder.products = plainOrder.products.map(product => {
+                        // The quantity is stored in the junction table (OrderItem)
+                        product.quantity = product.orderItem.quantity;
+                        return product;
+                    });
+                }
+                return plainOrder;
+            });
 
-        res.render('shop/orders', {
-            pageTitle: 'Your Orders',
-            currentPage: 'orders',
-            orders: plainOrders,
-            orderCss:true,
-            isAuthenticated: req.isLoggedIn
+            res.render('shop/orders', {
+                pageTitle: 'Your Orders',
+                currentPage: 'orders',
+                orders: plainOrders,
+                orderCss: true,
+                isAuthenticated: req.session.isLoggedIn
+            });
+        })
+        .catch(err => {
+            console.error('Error fetching orders:', err);
+            res.status(500).render('500', {
+                pageTitle: 'Error',
+                currentPage: 'error'
+            });
         });
-    })
-    .catch(err => {
-        console.error('Error fetching orders:', err);
-        res.status(500).render('500', {
-            pageTitle: 'Error',
-            currentPage: 'error'
-        });
-    });
 };
