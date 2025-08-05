@@ -8,17 +8,33 @@ const Cart = require('./models/cart');
 const CartItem = require('./models/cart-items'); // Import the CartItem model
 const Order = require('./models/order'); // Import the Order model
 const OrderItem = require('./models/order-item'); // Import the OrderItem model
-const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
+const session = require('express-session');
+const MongoDbStore = require('connect-mongodb-session')(session); // Import MongoDB session store
 
 const adminRoutes = require('./routes/admin').router;
 const shopRoutes = require('./routes/shop').router;
 const authRoutes = require('./routes/auth'); 
 
+
+const app = express();
+const store = new MongoDbStore({
+    uri: 'mongodb://localhost:27017/sessions', // MongoDB connection URI
+    collection: 'sessions' // Collection name for storing sessions
+});
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false })); // Middleware to parse URL-encoded bodies
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the public directory
+app.use(session({
+    secret: 'my secret',         // used to sign the cookie
+    resave: false,               // don’t save session if nothing changed
+    saveUninitialized: false,     // don’t save empty sessions
+    // cookie: {
+    //     maxAge: 1000 * 60 * 60 * 24 // Cookie expiration time (1 day)
+    // }
+    store: store // Use MongoDB session store
+}));
 
 // Register eq helper with Handlebars engine
 const hbs = expressHbs.create({

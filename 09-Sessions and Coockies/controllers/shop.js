@@ -29,31 +29,18 @@ exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the
 
 exports.getIndexPage = (req,res,next)=>{
     // PROTECT THE ROUTE
-      const cookieHeader = req.get('Cookie') || '';
-        const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split('=');
-            acc[key] = value;
-            return acc;
-        }, {});
+     
     Product.findAll()
     .then((products) =>{
         const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
-        if(cookies.loggedIn === 'true') {
             res.render('shop/index',{
                 pageTitle: 'Home page',
                 products: plainProducts,
                 hasProducts: plainProducts.length > 0,
                 currentPage:'index',
-            productCss:true,
-            isAuthenticated: cookies.loggedIn === 'true'
-
+            productCss:true
             })
-        }else{
-            res.render('404', {
-                pageTitle: 'Page Not Found',
-                currentPage: 'error'
-            });
-        }
+      
     })
     .catch(err =>{
         console.error('Error fetching products:', err);
