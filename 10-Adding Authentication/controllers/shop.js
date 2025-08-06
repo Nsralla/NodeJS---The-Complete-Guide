@@ -54,7 +54,13 @@ exports.getCart = (req, res, next) => {
     req.user.getCart()
         .then(cart => {
             if (!cart) {
-                return res.redirect('/'); // Redirect if no cart found
+                return res.render('shop/cart', {
+                pageTitle: 'Your Cart',
+                currentPage: 'cart',
+                cartCss: true,
+                isAuthenticated: req.session.isLoggedIn,
+                isCartEmpty: true
+            }); 
             }
             return cart.getProducts({
                 through: { attributes: ['quantity'] } // include quantity from CartItem
