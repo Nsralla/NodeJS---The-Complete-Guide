@@ -2,6 +2,9 @@
 const Product = require('../models/product'); // Import Product model
 
 exports.getAddProductPage = (req, res, next) => {
+    if(! req.session.isLoggedIn){
+        return res.redirect('/login'); // Redirect to login if not authenticated
+    }
     res.render('admin/add-product',
          { pageTitle: 'Add Product',
             formCss: 'add-product.css',

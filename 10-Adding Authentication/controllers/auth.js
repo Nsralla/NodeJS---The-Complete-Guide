@@ -33,8 +33,8 @@ exports.postLogin = async (req, res, next) => {
     });
   }
   //@ts-ignore
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if(!isPasswordValid){
+  const isMatched = await bcrypt.compare(password, user.password);
+  if(!isMatched){
     return res.status(401).render('auth/login',{
       pageTitle: 'Login',
       loginCss: true,
@@ -46,9 +46,7 @@ exports.postLogin = async (req, res, next) => {
 
 
   req.session.isLoggedIn = true;
-  // @ts-ignore
   req.user = user;
-    // @ts-ignore
   req.session.userId = user.id; // Store user ID in session for later use
   req.session.save(err => {
     if (err) {

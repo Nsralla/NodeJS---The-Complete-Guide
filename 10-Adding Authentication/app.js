@@ -18,6 +18,7 @@ const shopRoutes = require('./routes/shop').router;
 const authRoutes = require('./routes/auth');
 
 
+
 const app = express();
 const store = new MongoDbStore({
   uri: 'mongodb://localhost:27017/sessions',

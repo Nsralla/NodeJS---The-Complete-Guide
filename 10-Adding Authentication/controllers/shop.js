@@ -4,7 +4,8 @@ const Order = require('../models/order'); // Import Order model
 
 exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the url must match exactly
     // send products to the shop page
-    Product.findAll()
+    // fetch all products for the current user
+    Product.findAll({where:{ userId: req.session.userId}})
         .then((products) => {
             const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
             res.render('shop/product-list', {
@@ -53,16 +54,15 @@ exports.getCart = (req, res, next) => {
     req.user.getCart()
         .then(cart => {
             if (!cart) {
-                return res.status(404).render('404', {
-                    pageTitle: 'Cart Not Found',
-                    currentPage: 'error'
-                });
+                return res.redirect('/'); // Redirect if no cart found
             }
             return cart.getProducts({
                 through: { attributes: ['quantity'] } // include quantity from CartItem
             });
         })
         .then(products => {
+            if(!products)
+                return null;
             if (products.length === 0) {
                 return res.render('shop/cart', {
                     pageTitle: 'Your Cart',
