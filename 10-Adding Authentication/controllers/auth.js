@@ -6,8 +6,7 @@ exports.getLoginPage = (req, res, next) => {
     res.render('auth/login', {
         pageTitle: 'Login',
         loginCss: true,
-        currentPage: 'login',
-        isAuthenticated: req.session.isLoggedIn
+        currentPage: 'login'
     });
 }
 
@@ -28,7 +27,6 @@ exports.postLogin = async (req, res, next) => {
       pageTitle: 'Login',
       loginCss: true,
       currentPage: 'login',
-      isAuthenticated: req.session.isLoggedIn,
       errorMessage: 'No user found with this email.'
     });
   }
@@ -39,7 +37,6 @@ exports.postLogin = async (req, res, next) => {
       pageTitle: 'Login',
       loginCss: true,
       currentPage: 'login',
-      isAuthenticated: req.session.isLoggedIn,
       errorMessage: 'Incorrect password. Please try again.'
     });
   }
@@ -77,7 +74,6 @@ exports.getSignupPage = (req, res, next) => {
       pageTitle: 'Signup',
       signupCss: true,
       currentPage: 'signup',
-      isAuthenticated: req.session.isLoggedIn
     })
 };
 
@@ -89,7 +85,6 @@ exports.postSignup = async (req,res,next)=>{
       pageTitle: 'Signup',
       signupCss: true,
       currentPage: 'signup',
-      isAuthenticated: req.session.isLoggedIn,
       errorMessage: 'User already exists with this email. Please try another one.'
     });
   }
@@ -99,7 +94,6 @@ exports.postSignup = async (req,res,next)=>{
   res.status(201).render('auth/login', {
     pageTitle: 'Login',
     loginCss: true,
-    currentPage: 'login',
-    isAuthenticated: req.session.isLoggedIn
+    currentPage: 'login'
   });
 };

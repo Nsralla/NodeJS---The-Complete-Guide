@@ -8,8 +8,8 @@ exports.getAddProductPage = (req, res, next) => {
     res.render('admin/add-product',
          { pageTitle: 'Add Product',
             formCss: 'add-product.css',
-            currentPage: 'add-product',
-            isAuthenticated: req.session.isLoggedIn }); // Render add-product view with a title and CSS
+            currentPage: 'add-product'
+             }); // Render add-product view with a title and CSS
 }
 exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
 
@@ -71,7 +71,6 @@ exports.getProducts = (req, res, next) => {
             hasProducts: plainProducts.length > 0,
             productCss: true,
             currentPage: 'admin-products',
-            isAuthenticated: req.session.isLoggedIn,
     });
     })
     .catch(err=>{
@@ -123,7 +122,6 @@ exports.getEditProductPage = (req,res,next)=>{
         product: plainProduct,
         pageTitle: 'Edit Product',
         editProductCss:true,
-        isAuthenticated: req.session.isLoggedIn,
     });
     })
     .catch(err=>{

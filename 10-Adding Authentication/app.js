@@ -12,6 +12,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const session = require('express-session');
 const MongoDbStore = require('connect-mongodb-session')(session); // Import MongoDB session store
+const csrf = require('csurf'); // Import CSRF protection middleware
+const csrfProtection = csrf();
 
 const adminRoutes = require('./routes/admin').router;
 const shopRoutes = require('./routes/shop').router;
@@ -50,6 +52,7 @@ app.use(session({
     sameSite: 'lax' // Add this for better cookie handling
   }
 }));
+app.use(csrfProtection); // Use CSRF protection middleware
 
 // Register eq helper with Handlebars engine
 const hbs = expressHbs.create({
@@ -93,6 +96,11 @@ app.use((req, res, next) => {
       console.error("Error while fetching the user:", err);
       next(err);
     });
+});
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken(); // Make CSRF token available in templates
+  res.locals.isAuthenticated = req.session.isLoggedIn;  // Make isAuthenticated available in templates
+  next();
 });
 app.use('/admin', adminRoutes); // Use admin routes
 app.use(shopRoutes); // Use shop routes

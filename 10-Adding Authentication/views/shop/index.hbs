@@ -26,6 +26,7 @@
                   {{else}}
                     <p>Please log in to add products to your cart.</p>
                   {{/if}}
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
                 </form>
                 <a href="/products/{{this.id}}">Details</a>
                </li>

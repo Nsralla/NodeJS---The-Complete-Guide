@@ -45,6 +45,7 @@
                 <span class="btn-text">Sign In</span>
                 <span class="btn-icon">→</span>
             </button>
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
         </form>
         {{#if errorMessage}}
             <div class="error-message">
