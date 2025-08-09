@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{pageTitle}}</title>
+    <link rel="stylesheet" href="/css/main.css">
+    {{#if formCss}}
+        <link rel="stylesheet" href="/css/{{formCss}}">
+    {{/if}}
+
+    {{#if cartCss}}
+        <link rel="stylesheet" href="/css/cart.css">
+    {{/if}}
+    {{#if productDetailsCss}}
+        <link rel="stylesheet" href="/css/product-details.css">
+    {{/if}}
+    {{#if productCss}}
+        <link rel="stylesheet" href="/css/product-list.css">
+    {{/if}}
+    {{#if editProductCss}}
+        <link rel="stylesheet" href="/css/editProduct.css">
+    {{/if}}
+    {{#if orderCss}}
+        <link rel="stylesheet" href="/css/order.css">
+    {{/if}}
+    {{#if loginCss}}
+        <link rel="stylesheet" href="/css/login.css">
+    {{/if}}
+    {{#if signupCss}}
+    <link rel="stylesheet" href="/css/signup.css">
+    {{/if}}
+    {{#if page404}}
+        <link rel="stylesheet" href="/css/404.css">
+    {{/if}}
+  
+
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <ul>
+                {{#if isAuthenticated}}
+                    <li class="{{#if (eq currentPage 'index')}}active{{/if}}"><a href="/">Shop</a></li>
+                    <li class="{{#if (eq currentPage 'add-product')}}active{{/if}}"><a href="/admin/add-product">Add Product</a></li>
+                    <li class="{{#if (eq currentPage 'products')}}active{{/if}}"><a href="/products">Products</a></li>
+
+                    <li class="{{#if (eq currentPage 'cart')}}active{{/if}}"><a href="/cart">Cart</a></li>
+                    <li class="{{#if (eq currentPage 'orders')}}active{{/if}}"><a href="/orders">Orders</a></li>
+                    <li class="{{#if (eq currentPage 'admin-products')}}active{{/if}}"><a href="/admin/products">Admin Products</a></li>
+                    <li>
+                        <form action="/logout" method="POST">
+                            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                            <button type="submit">Logout</button>
+                        </form>
+                    </li>
+            </ul>
+                {{else}}
+                 <li class="{{#if (eq currentPage 'index')}}active{{/if}}"><a href="/">Shop</a></li>
+                 <li class="{{#if (eq currentPage 'products')}}active{{/if}}"><a href="/products">Products</a></li>
+                     <li class="{{#if (eq currentPage 'login')}}active{{/if}}"><a href="/login">Login</a></li>
+                    <li class="{{#if (eq currentPage 'signup')}}active{{/if}}"><a href="/signup">Sign Up</a></li>
+                {{/if}}
+        </nav>
+    </header>
+
+    <main>
+        {{{body}}}
+    </main>
+
+</body>
+
+</html>

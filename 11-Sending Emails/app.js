@@ -1,0 +1,152 @@
+const express = require('express');
+const expressHbs = require('express-handlebars');
+// const db = require('./util/database.js'); // Import the database connection
+const sequelize = require('./util/database'); // Import the Sequelize instance
+const Product = require('./models/product'); // Import the Product model
+const User = require('./models/user'); // Import the User model
+const Cart = require('./models/cart');
+const CartItem = require('./models/cart-items'); // Import the CartItem model
+const Order = require('./models/order'); // Import the Order model
+const OrderItem = require('./models/order-item'); // Import the OrderItem model
+const bodyParser = require('body-parser');
+const path = require('path');
+const session = require('express-session');
+const MongoDbStore = require('connect-mongodb-session')(session); // Import MongoDB session store
+const csrf = require('csurf'); // Import CSRF protection middleware
+const csrfProtection = csrf();
+
+const adminRoutes = require('./routes/admin').router;
+const shopRoutes = require('./routes/shop').router;
+const authRoutes = require('./routes/auth');
+
+
+
+const app = express();
+const store = new MongoDbStore({
+  uri: 'mongodb://localhost:27017/sessions',
+  collection: 'sessions'
+});
+
+// Add error handling for the store
+store.on('error', function (error) {
+  console.log('Session store error:', error);
+});
+
+// Test the store connection
+store.on('connected', function () {
+  console.log('MongoDB session store connected successfully');
+});
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended: false })); // Middleware to parse URL-encoded bodies
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the public directory
+app.use(session({
+  secret: 'my secret',
+  resave: false,
+  saveUninitialized: false,
+  store: store,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    secure: false, // Set to false for HTTP (development)
+    httpOnly: true,
+    sameSite: 'lax' // Add this for better cookie handling
+  }
+}));
+app.use(csrfProtection); // Use CSRF protection middleware
+
+// Register eq helper with Handlebars engine
+const hbs = expressHbs.create({
+  layoutsDir: path.join(__dirname, 'views/layouts'),
+  defaultLayout: 'main',
+  extname: 'hbs',
+  helpers: {
+    eq: (a, b) => a === b
+  }
+});
+// Configure handlebars engine
+app.engine('hbs', hbs.engine); // Register the handlebars engine with the app
+app.set('view engine', 'hbs'); // Set handlebars as the templating engine
+app.set('views', path.join(__dirname, 'views')); // Set the views directory for handlebars templates
+
+
+
+
+// Routes
+app.use((req, res, next) => {
+  if (!req.session.isLoggedIn) {
+    // Note: you're using isLoggedIn in auth.js, not loggedIn
+    return next();
+  }
+  
+  if (!req.session.userId) {
+    console.log('No userId in session, skipping user fetch');
+    return next();
+  }
+  
+  User.findByPk(req.session.userId)
+    .then(user => {
+      if (!user) {
+        console.log(`No user found with ID ${req.session.userId}`);
+        return next();
+      }
+      req.user = user; // Set the user object on the request
+      next();
+    })
+    .catch(err => {
+      console.error("Error while fetching the user:", err);
+      next(err);
+    });
+});
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken(); // Make CSRF token available in templates
+  res.locals.isAuthenticated = req.session.isLoggedIn;  // Make isAuthenticated available in templates
+  next();
+});
+app.use('/admin', adminRoutes); // Use admin routes
+app.use(shopRoutes); // Use shop routes
+app.use(authRoutes);
+const errorController = require('./controllers/404');
+app.use(errorController.get404Page);
+
+
+
+
+// associate models (RELATIONSHIPS)
+//1- one to many relationship between User and Product (creation of products)
+Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' }); // Define the relationship between Product and User
+User.hasMany(Product); // A User can have many Products
+//2- One to One relationship between User and Cart
+User.hasOne(Cart); // A User can have  one Cart
+Cart.belongsTo(User); // A Cart belongs to a User
+//3- Many to Many relationship between Cart and Product
+Cart.belongsToMany(Product, { through: CartItem });
+Product.belongsToMany(Cart, { through: CartItem });
+//4- One to Many relationship between Order and User
+User.hasMany(Order);
+Order.belongsTo(User);
+// 5- Many to Many relationship between Order and Product
+Order.belongsToMany(Product, { through: OrderItem }); // Many to Many relationship between Order and Product
+Product.belongsToMany(Order, { through: OrderItem });
+
+
+
+sequelize
+  .sync({  }) // Sync the database, force:true will drop the table if it exists
+  .then(result => {
+    console.log('Database synced successfully');
+    app.listen(3000, () => {
+      console.log('Server is running on port 3000');
+    });
+
+  })
+  .catch(err => {
+    console.log(err);
+  });
+
+
+
+// Use Case	.toJSON() Needed?
+// Access fields in JS code (.title)	❌ No
+// Rendering in Handlebars/EJS	✅ Yes
+// Sending as JSON (res.json(...))	✅ Yes
+// Looping with .map() or using spread	✅ Yes
