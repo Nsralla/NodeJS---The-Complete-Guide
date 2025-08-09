@@ -1,5 +1,14 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+require('dotenv').config(); // Add this line to load environment variables
+const nodemailer = require('nodemailer'); // Import nodemailer for sending emails
+const snedGridTransport = require('nodemailer-sendgrid-transport'); // Import SendGrid transport for nodemailer
+const transporter = nodemailer.createTransport(snedGridTransport({
+  auth: {
+    api_key: process.env.SENDGRID_API_KEY // Use the SendGrid API key from environment variables
+  }
+}));
+
 exports.getLoginPage = (req, res, next) => {
     // Render the login page with Handlebars
     console.log(req.session.isLoggedIn); // Log the session status
@@ -50,7 +59,21 @@ exports.postLogin = async (req, res, next) => {
       console.error('Error saving session:', err);
       return res.status(500).render('500');
     }
-    res.redirect('/');
+    // Send a welcome email using SendGrid
+    transporter.sendMail({
+      to: user.email,
+      from: 'your-email@example.com',
+      subject: 'Welcome to Our App!',
+      text: 'Thank you for signing up for our app!'
+    })
+    .then(() => {
+      console.log('Welcome email sent successfully');
+      res.redirect('/');
+    })
+    .catch(err => {
+      console.error('Error sending welcome email:', err);
+      res.redirect('/');
+    });
   });
 };
 
