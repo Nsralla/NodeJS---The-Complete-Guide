@@ -29,6 +29,7 @@ Progressive, hands-on labs that follow _“Node.js – The Complete Guide”_
 | **09-Sessions and Cookies** | State management | `express-session`, MySQL store |
 | **10-Adding Authentication** | Auth basics | Signup, login, hashed passwords |
 | **11-Sending emails** | Sending email to user when login | login page email welcome|
+| **12-Advanced authentication** | add user reset password functionality | user reset password via emails, tokens |
 
 > _Future sections can drop right in (11-XX). Feel free to extend!_
 
