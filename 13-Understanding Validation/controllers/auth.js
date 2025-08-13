@@ -125,9 +125,9 @@ exports.postSignup = async (req, res, next) => {
       errorMessage: 'User already exists with this email. Please try another one.'
     });
   }
+  
   const hashedPassword = await bcrypt.hash(password, 12);
   const newUser = await User.create({ email, password: hashedPassword });
-  console.log('New user created:', newUser);
   res.status(201).render('auth/login', {
     pageTitle: 'Login',
     loginCss: true,
