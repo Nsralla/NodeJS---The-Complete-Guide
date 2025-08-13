@@ -83,23 +83,42 @@ exports.getProducts = (req, res, next) => {
   
 };
 
-exports.postDeleteProduct = (req,res,next)=>{
-    const productId = req.params.productId; // Get the product title from the request parameters
-    Product.destroy(
-        {where:
-            {id:productId,
-             userId:req.user.id // Ensure the product belongs to the user
-            }})
-    .then(result=>{
-        console.log(`Product with ID ${productId} deleted successfully`);
-        res.redirect('/admin/products'); // Redirect to the admin products page after deletion
-    })
-    .catch(err=>{
-        console.error('Error deleting product:', err);
+exports.postDeleteProduct = async (req,res,next)=>{
+    try{
+        const productId = req.params.productId; // Get the product title from the request parameters
+        // find the user who added the product
+        const product = await Product.findByPk(productId);
+        if (!product) {
+            return res.status(404).render('404', {
+                pageTitle: 'Product Not Found',
+                currentPage: 'error'
+            });
+        }
+
+        const userId = product.userId; // Get the userId from the product
+        if(userId !== req.user.id) {
+            return res.status(403).render('403', {
+                pageTitle: 'Forbidden',
+                currentPage: 'error'
+            });
+        }
+        await Product.destroy({
+            where:{
+                id:productId
+            }
+        });
+        
+        res.redirect('/admin/products'); // Redirect to admin products page after deletion
+    }
+    catch(error){
+        console.error('Error deleting product:', error);
         res.status(500).render('500',{
             pageTitle: 'Error',
+            currentPage: 'error',
+            errorMessage: 'An error occurred while deleting the product.'
         });
-    });    
+    }
+  
 }
 
 exports.getEditProductPage = (req,res,next)=>{
@@ -136,37 +155,62 @@ exports.getEditProductPage = (req,res,next)=>{
 
 
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
     const productId = req.params.productId;
-    // const products = Product.fetchAll();
-    Product.findOne({
-        where:{
-            id: productId,
-            userId:req.user.id
-        }
-    })
-    .then((product)=>{
-        if(!product) {
-            return res.status(404).render('404', {
-                pageTitle: 'Product Not Found',
-                currentPage: 'error'
-            });
-        }
-        product.title = req.body.title;
-        product.imageUrl = req.body.imageUrl;
-        product.description = req.body.description;
-        product.price = req.body.price;
-        return product.save(); // Save the updated product, it will return a promise, so we have to handle it inside then
-    })
-    .then(()=>{
-        res.redirect('/admin/products');
-    })
-    .catch(err =>{ // catch will handle both findByPk and save errors
-        console.error('Error fetching products:', err);
-        res.status(500).render('500', {
-            pageTitle: 'Error',
-            currentPage: 'error',
-            errorMessage: 'An error occurred while updating the product.'
+    const product = await Product.findByPk(productId);
+    const userId = product.userId; // Get the userId from the product
+    if(userId !== req.user.id){
+        return res.status(403).render('403', {
+            pageTitle: 'Forbidden',
+            currentPage: 'error'
         });
-    }); 
+    }
+
+    if (!product) {
+        return res.status(404).render('404', {
+            pageTitle: 'Product Not Found',
+            currentPage: 'error'
+        });
+    }
+
+    product.title = req.body.title; 
+    product.imageUrl = req.body.imageUrl;
+    product.description = req.body.description;
+    product.price = req.body.price;
+
+    await product.save();
+
+    res.redirect('/admin/products');
+
+
+    // Product.findOne({
+    //     where:{
+    //`         id: productId,
+    //         userId:req.user.id
+    //     }
+    // })
+    // .then((product)=>{
+    //     if(!product) {
+    //         return res.status(404).render('404', {
+    //             pageTitle: 'Product Not Found',
+    //             currentPage: 'error'
+    //         });
+    //     }
+    //     product.title = req.body.title;
+    //     product.imageUrl = req.body.imageUrl;
+    //     product.description = req.body.description;
+    //     product.price = req.body.price;
+    //     return product.save(); // Save the updated product, it will return a promise, so we have to handle it inside then
+    // })
+    // .then(()=>{
+    //     res.redirect('/admin/products');
+    // })
+    // .catch(err =>{ // catch will handle both findByPk and save errors
+    //     console.error('Error fetching products:', err);
+    //     res.status(500).render('500', {
+    //         pageTitle: 'Error',
+    //         currentPage: 'error',
+    //         errorMessage: 'An error occurred while updating the product.'
+    //     });
+    // }); 
 };
