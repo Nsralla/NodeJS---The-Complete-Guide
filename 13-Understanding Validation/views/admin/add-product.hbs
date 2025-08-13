@@ -1,0 +1,58 @@
+<div class="add-product-container">
+    <div class="add-product-header">
+        <h1 class="add-product-title">Add New Product</h1>
+        <p class="add-product-subtitle">Create a new product for your store</p>
+    </div>
+
+    <form class="add-product-form" action="/admin/add-product" method="POST">
+        <div class="form-group">
+            <label class="form-label" for="title">
+                <i class="label-icon">📝</i>
+                Product Title
+            </label>
+            <input class="form-input" type="text" id="title" name="title" placeholder="Enter product title" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="imageUrl">
+                <i class="label-icon">🖼️</i>
+                Image URL
+            </label>
+            <input class="form-input" type="url" id="imageUrl" name="imageUrl"
+                placeholder="https://example.com/image.jpg" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="description">
+                <i class="label-icon">📄</i>
+                Description
+            </label>
+            <textarea class="form-textarea" id="description" name="description"
+                placeholder="Describe your product in detail..." rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="price">
+                <i class="label-icon">💰</i>
+                Price
+            </label>
+            <div class="price-input-wrapper">
+                <span class="currency-symbol">$</span>
+                <input class="form-input price-input" type="number" id="price" name="price" placeholder="0.00"
+                    step="0.01" min="0" required>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="btn-icon">✨</i>
+                Add Product
+            </button>
+            <a href="/admin/products" class="btn btn-secondary">
+                <i class="btn-icon">👁️</i>
+                View Products
+            </a>
+        </div>
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    </form>
+</div>
