@@ -28,6 +28,8 @@ Progressive, hands-on labs that follow _“Node.js – The Complete Guide”_
 | **08-Sequelize** | ORM & associations | Models, relationships, eager loading |
 | **09-Sessions and Cookies** | State management | `express-session`, MySQL store |
 | **10-Adding Authentication** | Auth basics | Signup, login, hashed passwords |
+| **11-Sending emails** | Sending email to user when login | login page email welcome|
+| **12-Advanced authentication** | add user reset password functionality | user reset password via emails, tokens |
 
 > _Future sections can drop right in (11-XX). Feel free to extend!_
 
@@ -54,22 +56,6 @@ Progressive, hands-on labs that follow _“Node.js – The Complete Guide”_
 > templating engines, SQL/Sequelize, sessions, authentication and more.
 
 ---
-
-## 📁 Folder-by-folder roadmap
-
-| Folder | Topic covered | Highlights |
-| ------ | ------------- | ---------- |
-| **00-Optional JavaScript A Quick Refresher** | Modern JS syntax refresher | `let/const`, arrow functions, spread/rest |
-| **01-Understanding the Basics** | Core Node APIs | `http`, routing, basic file I/O |
-| **02-Improved Development Workflow and Debugging** | Tooling | Nodemon, VS Code debugging |
-| **03-Working with EXPRESS.js** | Express fundamentals | Express router, static assets |
-| **04-Working with Dynamic Content + Templating** | EJS templating | Layouts, partials, dynamic pages |
-| **05-Model-View-Controller** | App structure | Splitting routes, controllers, views |
-| **06-Enhancing the App** | User experience | Error pages, 404 handling, styling |
-| **07-SQL Introduction** | Raw SQL | MySQL connection pool, basic queries |
-| **08-Sequelize** | ORM & associations | Models, relationships, eager loading |
-| **09-Sessions and Cookies** | State management | `express-session`, MySQL store |
-| **10-Adding Authentication** | Auth basics | Signup, login, hashed passwords |
 
 > _Future sections can drop right in (11-XX). Feel free to extend!_
 
