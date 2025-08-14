@@ -1,6 +1,6 @@
 
 const Product = require('../models/product'); // Import Product model
-
+const validationResult = require('express-validator').validationResult; // Import validationResult from express-validator
 exports.getAddProductPage = (req, res, next) => {
     if(! req.session.isLoggedIn){
         return res.redirect('/login'); // Redirect to login if not authenticated
@@ -12,7 +12,21 @@ exports.getAddProductPage = (req, res, next) => {
              }); // Render add-product view with a title and CSS
 }
 exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
-
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).render('admin/add-product', {
+            pageTitle: 'Add Product',
+            formCss: 'add-product.css',
+            currentPage: 'add-product',
+            errorMessage: errors.array()[0].msg,
+            oldInput:{
+                title: req.body.title,
+                imageUrl: req.body.imageUrl,
+                description: req.body.description,
+                price: req.body.price
+            }
+        });
+    }
     req.user.createProduct({
         title: req.body.title,
         imageUrl: req.body.imageUrl,
@@ -20,8 +34,6 @@ exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
         price: req.body.price,
         userId:req.user.id
     }).then((result) =>{
-        // @ts-ignore
-        console.log(`Product ${req.body.title} added successfully to the database`);
         res.redirect('/'); // Redirect to shop page after adding product
     })
     .catch(err=>{
@@ -159,6 +171,20 @@ exports.postEditProduct = async (req, res, next) => {
     const productId = req.params.productId;
     const product = await Product.findByPk(productId);
     const userId = product.userId; // Get the userId from the product
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Edit Product',
+            currentPage: 'admin-products',
+            oldInput: {
+                title: req.body.title,
+                imageUrl: req.body.imageUrl,
+                description: req.body.description,
+                price: req.body.price
+            },
+            validationErrors: errors.array()[0].msg
+        });
+    }
     if(userId !== req.user.id){
         return res.status(403).render('403', {
             pageTitle: 'Forbidden',

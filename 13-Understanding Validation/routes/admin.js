@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: false }));
 const adminController = require('../controllers/admin');
 const isAuth = require('../middleware/isAuth'); // Import the authentication middleware
+const {check} = require('express-validator'); // Import express-validator for validation
 
 //1- admin/add-product route GET ROUTE, to display add product form
 router.get('/add-product', isAuth, adminController.getAddProductPage) // will only trigger on GET request
@@ -13,13 +14,25 @@ router.get('/add-product', isAuth, adminController.getAddProductPage) // will on
 router.get('/products', isAuth, adminController.getProducts);
 
 //3- admin/ add-product POST route to handle form submission
-router.post('/add-product', isAuth, adminController.postAddProduct);
+router.post('/add-product',
+    check('title').trim().isAlphanumeric().isLength({ min: 3 }).withMessage("Title must be at least 3 characters long and alphanumeric."),
+    check('imageUrl').trim().isURL().withMessage("Invalid image URL."),
+    check('price').trim().isFloat({ min: 0.01 }).withMessage("Invalid price."),
+    check('description').trim().isLength({ min: 5 }).withMessage("Description must be at least 5 characters long."),
+    isAuth,
+    adminController.postAddProduct);
 
 //4- admin/delete-product/:productId route to handle product deletion
-router.post('/delete-product/:productId', isAuth, adminController.postDeleteProduct);
+router.post('/delete-product/:productId',
+    check('title').trim().isAlphanumeric().isLength({ min: 3 }).withMessage("Title must be at least 3 characters long and alphanumeric."),
+    check('imageUrl').trim().isURL().withMessage("Invalid image URL."),
+    check('price').trim().isFloat({ min: 0.01 }).withMessage("Invalid price."),
+    check('description').trim().isLength({ min: 5 }).withMessage("Description must be at least 5 characters long."),
+    isAuth,
+    adminController.postDeleteProduct);
 
 //5-admin/edit-product/:productId: edit produt route
-router.get('/edit-product/:productId', isAuth, adminController.getEditProductPage);
+router.get('/edit-product/:productId',isAuth,adminController.getEditProductPage);
 
 // 6-admin/edit-product/:productId
 router.post('/edit-product/:productId', isAuth, adminController.postEditProduct); // POST route to handle product editing

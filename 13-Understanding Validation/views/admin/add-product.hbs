@@ -10,7 +10,14 @@
                 <i class="label-icon">📝</i>
                 Product Title
             </label>
-            <input class="form-input" type="text" id="title" name="title" placeholder="Enter product title" required>
+            <input 
+                class="form-input"
+                type="text" 
+                id="title" 
+                name="title" 
+                placeholder="Enter product title"
+                value="{{#if oldInput.title}}{{oldInput.title}}{{/if}}"
+                required>
         </div>
 
         <div class="form-group">
@@ -18,8 +25,14 @@
                 <i class="label-icon">🖼️</i>
                 Image URL
             </label>
-            <input class="form-input" type="url" id="imageUrl" name="imageUrl"
-                placeholder="https://example.com/image.jpg" required>
+            <input
+                class="form-input"
+                type="url"
+                id="imageUrl"
+                name="imageUrl"
+                placeholder="https://example.com/image.jpg"
+                value="{{#if oldInput.imageUrl}}{{oldInput.imageUrl}}{{/if}}"
+                required>
         </div>
 
         <div class="form-group">
@@ -27,8 +40,14 @@
                 <i class="label-icon">📄</i>
                 Description
             </label>
-            <textarea class="form-textarea" id="description" name="description"
-                placeholder="Describe your product in detail..." rows="4" required></textarea>
+            <textarea
+             class="form-textarea"
+                id="description"
+                name="description"
+                placeholder="Describe your product in detail..." rows="4"
+                value="{{#if oldInput.description}}{{oldInput.description}}{{/if}}"
+                required>
+            </textarea>
         </div>
 
         <div class="form-group">
@@ -38,7 +57,13 @@
             </label>
             <div class="price-input-wrapper">
                 <span class="currency-symbol">$</span>
-                <input class="form-input price-input" type="number" id="price" name="price" placeholder="0.00"
+                <input 
+                class="form-input price-input"
+                type="number" 
+                id="price" 
+                name="price"
+                placeholder="0.00"
+                value="{{#if oldInput.price}}{{oldInput.price}}{{/if}}"
                     step="0.01" min="0" required>
             </div>
         </div>

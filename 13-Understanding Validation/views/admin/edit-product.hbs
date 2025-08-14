@@ -10,8 +10,8 @@
                 <i class="label-icon">📝</i>
                 Product Title
             </label>
-            <input class="form-input" type="text" id="title" name="title" placeholder="Enter product title"
-                value="{{product.title}}" required>
+            <input class="form-input" type="text" id="title" name="title" placeholder="Enter product title" value="{{#if oldInput}}{{oldInput.title}}{{else}}{{product.title}}{{/if}}"
+                required>
         </div>
 
         <div class="form-group">
@@ -20,7 +20,7 @@
                 Image URL
             </label>
             <input class="form-input" type="url" id="imageUrl" name="imageUrl"
-                placeholder="https://example.com/image.jpg" value="{{product.imageUrl}}" required>
+                placeholder="https://example.com/image.jpg" value="{{#if oldInput}}{{oldInput.imageUrl}}{{else}}{{product.imageUrl}}{{/if}}" required>
         </div>
 
         <div class="form-group">
@@ -29,7 +29,7 @@
                 Description
             </label>
             <textarea class="form-textarea" id="description" name="description"
-                placeholder="Describe your product in detail..." rows="4" required>{{product.description}}</textarea>
+                placeholder="Describe your product in detail..." rows="4" required>{{#if oldInput}}{{oldInput.description}}{{else}}{{product.description}}{{/if}}</textarea>
         </div>
 
         <div class="form-group">
@@ -40,7 +40,7 @@
             <div class="price-input-wrapper">
                 <span class="currency-symbol">$</span>
                 <input class="form-input price-input" type="number" id="price" name="price" placeholder="0.00"
-                    value="{{product.price}}" step="0.01" min="0" required>
+                    value="{{#if oldInput}}{{oldInput.price}}{{else}}{{product.price}}{{/if}}" step="0.01" min="0" required>
             </div>
         </div>
 
