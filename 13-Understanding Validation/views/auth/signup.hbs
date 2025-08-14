@@ -1,21 +1,21 @@
 <div class="signup-container">
     <h2 class="signup-title">Create Your Account</h2>
-    <form class="signup-form" action="/signup" method="POST" novalidate>
+    <form class="signup-form" action="/signup" method="POST" novalidate >
         <div class="form-group">
             <label for="email">Email address</label>
-            <input class="form-control" id="email" type="email" name="email" placeholder="Enter your email" required>
+            <input class="form-control" id="email" type="email" name="email" placeholder="Enter your email" value="{{#if oldInput}}{{oldInput.email}}{{/if}}" required>
         </div>
 
         <div class="form-group">
             <label for="password">Password</label>
             <input class="form-control" id="password" type="password" name="password" placeholder="Create a password"
-                required>
+                value="{{#if oldInput}}{{oldInput.password}}{{/if}}" required>
         </div>
 
         <div class="form-group">
             <label for="confirmPassword">Confirm Password</label>
-            <input class="form-control" id="confirmPassword" type="password" name="confirmPassword"
-                placeholder="Confirm your password" required>
+            <input class="form-control" id="confirmPassword" type="password" name="confirmedPassword"
+                placeholder="Confirm your password" value="{{#if oldInput}}{{oldInput.confirmedPassword}}{{/if}}" required>
         </div>
 
         <button class="btn" type="submit">Sign Up</button>

@@ -3,13 +3,13 @@ const router = express.Router();
 const {check, body} = require('express-validator')
 const authController = require('../controllers/auth');
 router.get('/login',authController.getLoginPage); // Route to display the login page
-router.post('/login',authController.postLogin)
+router.post('/login',check('email').isEmail().withMessage("Invalid email address, please enter a valid email."),authController.postLogin)
 router.post('/logout',authController.postLogout);
 router.get('/signup', authController.getSignupPage);
 router.post('/signup',
-    check('email').isEmail().withMessage("Invalid email address, please enter a valid email."),
-    check('password').isLength({ min: 5 }).withMessage("Password must be at least 5 characters long"),
-    body('confirmPassword').custom((value, { req }) => {
+    check('email').isEmail().normalizeEmail().withMessage("Invalid email address, please enter a valid email."),
+    check('password').trim().isLength({ min: 5 }).withMessage("Password must be at least 5 characters long"),
+    body('confirmPassword').trim().custom((value, { req }) => {
         if (value !== req.body.password) {
             throw new Error("Passwords do not match");
         }

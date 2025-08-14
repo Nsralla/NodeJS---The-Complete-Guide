@@ -14,6 +14,7 @@
                     name="email" 
                     class="form-input" 
                     placeholder="Enter your email"
+                    value="{{#if oldInput}}{{oldInput.email}}{{/if}}"
                     required
                 >
                 <span class="input-icon">📧</span>
@@ -27,6 +28,7 @@
                     name="password" 
                     class="form-input" 
                     placeholder="Enter your password"
+                    value="{{#if oldInput}}{{oldInput.password}}{{/if}}"
                     required
                 >
                 <span class="input-icon">🔒</span>

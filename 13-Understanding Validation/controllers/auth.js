@@ -24,13 +24,31 @@ exports.getLoginPage = (req, res, next) => {
 
 exports.postLogin = async (req, res, next) => {
   const { email, password } = req.body;
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(422).render('auth/login', {
+      pageTitle: 'Login',
+      loginCss: true,
+      currentPage: 'login',
+      isAuthenticated: req.session.isLoggedIn,
+      errorMessage: errors.array()[0].msg,
+      oldInput:{
+        email,
+        password
+      }
+    })
+  }
   if (!email || !password) {
     return res.status(400).render('auth/login', {
       pageTitle: 'Login',
       loginCss: true,
       currentPage: 'login',
       isAuthenticated: req.session.isLoggedIn,
-      errorMessage: 'Please enter both email and password.'
+      errorMessage: 'Please enter both email and password.',
+      oldInput: {
+        email,
+        password
+      }
     });
   }
 
@@ -40,7 +58,11 @@ exports.postLogin = async (req, res, next) => {
       pageTitle: 'Login',
       loginCss: true,
       currentPage: 'login',
-      errorMessage: 'No user found with this email.'
+      errorMessage: 'No user found with this email.',
+      oldInput: {
+        email,
+        password
+      }
     });
   }
   //@ts-ignore
@@ -50,7 +72,11 @@ exports.postLogin = async (req, res, next) => {
       pageTitle: 'Login',
       loginCss: true,
       currentPage: 'login',
-      errorMessage: 'Incorrect password. Please try again.'
+      errorMessage: 'Incorrect password. Please try again.',
+      oldInput: {
+        email,
+        password
+      }
     });
   }
 
@@ -114,7 +140,12 @@ exports.postSignup = async (req, res, next) => {
       pageTitle: 'Signup',
       signupCss: true,
       currentPage: 'signup',
-      errorMessage: errors.array()[0].msg
+      errorMessage: errors.array()[0].msg,
+      oldInput:{
+        email,
+        password,
+        confirmedPassword
+      }
     })
   }
   if (user) {
@@ -122,10 +153,15 @@ exports.postSignup = async (req, res, next) => {
       pageTitle: 'Signup',
       signupCss: true,
       currentPage: 'signup',
-      errorMessage: 'User already exists with this email. Please try another one.'
+      errorMessage: 'User already exists with this email. Please try another one.',
+      oldInput:{
+        email,
+        password,
+        confirmedPassword
+      }
     });
   }
-  
+
   const hashedPassword = await bcrypt.hash(password, 12);
   const newUser = await User.create({ email, password: hashedPassword });
   res.status(201).render('auth/login', {
