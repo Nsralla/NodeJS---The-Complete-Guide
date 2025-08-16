@@ -1,0 +1,37 @@
+<div class="product-details">
+    {{#if product}}
+    <div class="product-details__container">
+        <div class="product-details__image-container">
+            <img class="product-details__image" src="{{product.imageUrl}}" alt="{{product.title}}">
+        </div>
+
+        <div class="product-details__info">
+            <h1 class="product-details__title">{{product.title}}</h1>
+            <div class="product-details__price">${{product.price}}</div>
+            <div class="product-details__description">
+                <h3 class="product-details__description-title">Description:</h3>
+                <p class="product-details__description-text">{{product.description}}</p>
+            </div>
+
+            <div class="product-details__actions">
+                {{#if isAuthenticated}}
+                <form class="product-details__cart-form" action="/cart" method="POST">
+                    <button class="btn product-details__cart-btn" type="submit">Add to Cart</button>
+                    <input type="hidden" name="productId" value="{{product.id}}">
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                </form>
+                {{else}}
+                <p class="product-details__login-prompt">Please log in to add products to your cart.</p>
+                {{/if}}
+                <a class="btn btn--secondary product-details__back-btn" href="/products">Back to Products</a>
+            </div>
+        </div>
+    </div>
+    {{else}}
+    <div class="product-details__error">
+        <h1 class="product-details__error-title">Product Not Found</h1>
+        <p class="product-details__error-message">The product you're looking for doesn't exist.</p>
+        <a class="btn product-details__error-btn" href="/products">View All Products</a>
+    </div>
+    {{/if}}
+</div>
