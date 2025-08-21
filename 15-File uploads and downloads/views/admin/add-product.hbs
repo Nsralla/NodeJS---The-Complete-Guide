@@ -3,8 +3,13 @@
         <h1 class="add-product-title">Add New Product</h1>
         <p class="add-product-subtitle">Create a new product for your store</p>
     </div>
-
-    <form class="add-product-form" action="/admin/add-product" method="POST" >
+    {{#if errorMessage}}
+        <div class="error-message">{{errorMessage}}</div>
+    {{/if}}
+    
+    
+    
+    <form class="add-product-form" action="/admin/add-product" method="POST" enctype="multipart/form-data" >
         <div class="form-group">
             <label class="form-label" for="title">
                 <i class="label-icon">📝</i>
@@ -21,16 +26,15 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="imageUrl">
+            <label class="form-label" for="image">
                 <i class="label-icon">🖼️</i>
-                Image URL
+                Image 
             </label>
             <input
                 class="form-input"
-                type="url"
-                id="imageUrl"
-                name="imageUrl"
-                placeholder="https://example.com/image.jpg"
+                type="file"
+                id="image"
+                name="image"
                 value="{{#if oldInput.imageUrl}}{{oldInput.imageUrl}}{{/if}}"
                 required>
         </div>
@@ -80,7 +84,5 @@
         </div>
             <input type="hidden" name="_csrf" value="{{csrfToken}}">
     </form>
-    {{#if errorMessage}}
-        <div class="error-message">{{errorMessage}}</div>
-    {{/if}}
+    
 </div>

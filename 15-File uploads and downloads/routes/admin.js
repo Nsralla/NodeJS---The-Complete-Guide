@@ -17,7 +17,6 @@ router.get('/products', isAuth, adminController.getProducts);
 router.post('/add-product',
     isAuth,
     check('title').trim().isLength({ min: 3 }).withMessage("Title must be at least 3 characters long and alphanumeric."),
-    check('imageUrl').trim().isURL().withMessage("Invalid image URL."),
     check('price').trim().isFloat({ min: 0.01 }).withMessage("Invalid price."),
     check('description').trim().isLength({ min: 5 }).withMessage("Description must be at least 5 characters long."),
    

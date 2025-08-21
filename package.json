@@ -19,6 +19,7 @@
     "express-handlebars": "^8.0.3",
     "express-session": "^1.18.2",
     "express-validator": "^7.2.1",
+    "multer": "^2.0.2",
     "mysql2": "^3.14.3",
     "nodemailer": "^7.0.5",
     "nodemailer-sendgrid-transport": "^0.2.0",

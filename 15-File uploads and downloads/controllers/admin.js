@@ -12,9 +12,25 @@ exports.getAddProductPage = (req, res, next) => {
              }); // Render add-product view with a title and CSS
 }
 exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
+    const file = req.file;
+    if(req.fileValidationError) {
+        return res.status(422).render('admin/add-product',{
+            pageTitle: 'Add Product',
+            formCss: 'add-product.css',
+            currentPage: 'add-product',
+            errorMessage: req.fileValidationError,
+            oldInput:{
+                title: req.body.title,
+                imageUrl: file ? file.path : '',
+                description: req.body.description,
+                price: req.body.price
+            }
+        });
+    }
+    console.log("FILE SUBMITTED: ", file);
     const errors = validationResult(req);
     console.log(errors);
-    if(!errors.isEmpty()){
+    if(!errors.isEmpty()) {
         return res.status(400).render('admin/add-product', {
             pageTitle: 'Add Product',
             formCss: 'add-product.css',
@@ -22,20 +38,20 @@ exports.postAddProduct = (req,res,next)=>{ // will only trigger on POST request
             errorMessage: errors.array()[0].msg + " for " + errors.array()[0].param,
             oldInput:{
                 title: req.body.title,
-                imageUrl: req.body.imageUrl,
+                imageUrl: file ? file.filename : '', // Use the file path from multer
                 description: req.body.description,
                 price: req.body.price
             }
         });
     }
+    const imageUrl = file? file.filename : ''; // Use the file path from multer
     req.user.createProduct({
         title: req.body.title,
-        imageUrl: req.body.imageUrl,
+        imageUrl: imageUrl,
         description: req.body.description,
         price: req.body.price,
-        nonExistentColumn: "This will cause an error", // This column doesn't exist
         userId:req.user.id
-    }).then((result) =>{
+    }).then((result) => {
         res.redirect('/'); // Redirect to shop page after adding product
     })
     .catch(err=>{
@@ -56,6 +72,7 @@ exports.getProducts = (req, res, next) => {
     })
     .then((products) => {
         const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
+        console.log("plain products:", plainProducts);
         res.render('admin/products', {
             products: plainProducts,
             pageTitle: 'Admin Products',
@@ -171,9 +188,10 @@ exports.postEditProduct = async (req, res, next) => {
         error.statusCode = 404; // Not Found
         return next(error); 
     }
+    const imageUrl = req.file ? req.file.filename : product.imageUrl; // Use the file path from multer or keep the existing image URL
 
     product.title = req.body.title; 
-    product.imageUrl = req.body.imageUrl;
+    product.imageUrl = imageUrl;
     product.description = req.body.description;
     product.price = req.body.price;
 

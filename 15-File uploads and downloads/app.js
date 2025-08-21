@@ -14,7 +14,7 @@ const session = require('express-session');
 const MongoDbStore = require('connect-mongodb-session')(session); // Import MongoDB session store
 const csrf = require('csurf'); // Import CSRF protection middleware
 const csrfProtection = csrf();
-
+const multer = require('multer');
 
 const adminRoutes = require('./routes/admin').router;
 const shopRoutes = require('./routes/shop').router;
@@ -38,9 +38,37 @@ store.on('connected', function () {
   console.log('MongoDB session store connected successfully');
 });
 
+
+const filter = (req, file, cb) => {
+  if (!file) {
+    return cb(null, false);
+  }
+  // Accept images only
+  if (file.mimetype.startsWith('image/')) {
+    return cb(null, true);
+  }
+  req.fileValidationError = 'Not an image! Please upload an image file (JPG, PNG, etc.)';
+  cb(null, false);
+};
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'uploads')); // Set the destination folder for uploaded files
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname); // Set the filename to include the current timestamp
+  }
+});
+
+
+
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false })); // Middleware to parse URL-encoded bodies
+app.use(multer({storage: fileStorage, fileFilter: filter}).single('image')); // Middleware to handle file uploads
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the public directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 app.use(session({
   secret: 'my secret',
   resave: false,
@@ -99,6 +127,8 @@ app.use((req, res, next) => {
       return next(error);
     });
 });
+
+
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken(); // Make CSRF token available in templates
   res.locals.isAuthenticated = req.session.isLoggedIn;  // Make isAuthenticated available in templates
@@ -126,16 +156,17 @@ app.use(errorController.get404Page);
 
 app.use((error, req,res, next)=>{
   const statusCode = error.statusCode || 500;
+  const isAuthenticated = req.session? req.session.isLoggedIn : false;
   if(statusCode === 400){
     return res.status(404).render('404',{
       pageTitle: 'Not Found',
-      isAuthenticated: req.session.isLoggedIn,
+      isAuthenticated: isAuthenticated,
       errorMessage: error.message || "AN KNOWN  ERROR OCCURED",
     });
   }
   return res.status(500).render('500',{
     pageTitle: 'Error',
-    isAuthenticated: req.session.isLoggedIn,
+    isAuthenticated: isAuthenticated,
     errorMessage: error.message || "AN KNOWN  ERROR OCCURED",
     originalMessage: error.originalMessage || "No original message available",
     errorStatus: 500  
@@ -162,7 +193,7 @@ Product.belongsToMany(Order, { through: OrderItem });
 
 
 sequelize
-  .sync({}) // Sync the database, force:true will drop the table if it exists
+  .sync({ }) // Sync the database, force:true will drop the table if it exists
   .then(result => {
     console.log('Database synced successfully');
     app.listen(3000, () => {

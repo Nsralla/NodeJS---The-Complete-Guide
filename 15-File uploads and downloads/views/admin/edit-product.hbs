@@ -4,7 +4,11 @@
         <p class="edit-product-subtitle">Update your product information</p>
     </div>
 
-    <form class="edit-product-form" action="/admin/edit-product/{{product.id}}" method="POST">
+      {{#if errorMessage}}
+        <div class="error-message">{{errorMessage}}</div>
+    {{/if}}
+
+    <form class="edit-product-form" action="/admin/edit-product/{{product.id}}" method="POST" enctype="multipart/form-data">
         <div class="form-group">
             <label class="form-label" for="title">
                 <i class="label-icon">📝</i>
@@ -15,12 +19,12 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="imageUrl">
+            <label class="form-label" for="image">
                 <i class="label-icon">🖼️</i>
-                Image URL
+                Image 
             </label>
-            <input class="form-input" type="url" id="imageUrl" name="imageUrl"
-                placeholder="https://example.com/image.jpg" value="{{#if oldInput}}{{oldInput.imageUrl}}{{else}}{{product.imageUrl}}{{/if}}" required>
+            <input class="form-input" type="file" id="image" name="image" src="/uploads/{{#if oldInput}}{{oldInput.imageUrl}}{{else}}{{product.imageUrl}}{{/if}}"
+                required>
         </div>
 
         <div class="form-group">
