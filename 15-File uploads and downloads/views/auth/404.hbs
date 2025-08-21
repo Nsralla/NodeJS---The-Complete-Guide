@@ -1,0 +1,139 @@
+<div class="error-page-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path fill="#f44336"
+                    d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z" />
+            </svg>
+        </div>
+
+        <h1 class="error-title">404 - Not Found</h1>
+
+        {{#if errorMessage}}
+        <div class="error-message">
+            <p>{{errorMessage}}</p>
+        </div>
+        {{else}}
+        <div class="error-message">
+            <p>The page or resource you're looking for doesn't exist or may have expired.</p>
+        </div>
+        {{/if}}
+
+        <div class="error-actions">
+            <a href="/login" class="btn btn-primary">Return to Login</a>
+            <a href="/" class="btn btn-secondary">Go to Homepage</a>
+        </div>
+
+        <div class="help-text">
+            <p>Need assistance? <a href="/contact">Contact support</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-page-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+    .error-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+        padding: 32px;
+        text-align: center;
+    }
+
+    .error-icon {
+        margin: 0 auto 24px;
+    }
+
+    .error-title {
+        color: #2c3e50;
+        font-size: 28px;
+        margin-bottom: 16px;
+    }
+
+    .error-message {
+        color: #5a6a7e;
+        font-size: 16px;
+        margin-bottom: 32px;
+        line-height: 1.5;
+    }
+
+    .error-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .btn {
+        display: inline-block;
+        font-weight: 500;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        user-select: none;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        line-height: 1.5;
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        color: #ffffff;
+        background-color: #3498db;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-secondary {
+        color: #2c3e50;
+        background-color: #e9ecef;
+    }
+
+    .btn-secondary:hover {
+        background-color: #dee2e6;
+    }
+
+    .help-text {
+        margin-top: 24px;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .help-text a {
+        color: #3498db;
+        text-decoration: none;
+    }
+
+    .help-text a:hover {
+        text-decoration: underline;
+    }
+
+    @media (min-width: 768px) {
+        .error-actions {
+            flex-direction: row;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .btn {
+            min-width: 180px;
+        }
+    }
+</style>

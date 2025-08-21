@@ -1,0 +1,54 @@
+.error-page {
+    text-align: center;
+    background-color: white;
+    padding: 3rem 4rem;
+    border-radius: 8px;
+
+ 
+}
+
+.error-page h1 {
+    font-size: 2.5rem;
+    color: #e74c3c;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.error-page p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #7f8c8d;
+}
+
+.error-page button {
+    background-color: #3498db;
+    border: none;
+    padding: 0;
+    border-radius: 4px;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.error-page button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.error-page a {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .error-page {
+        padding: 2rem;
+    }
+    
+    .error-page h1 {
+        font-size: 2rem;
+    }
+}
