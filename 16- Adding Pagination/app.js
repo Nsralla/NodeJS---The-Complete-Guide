@@ -195,7 +195,7 @@ Product.belongsToMany(Order, { through: OrderItem });
 
 
 sequelize
-  .sync({ force: true }) // Sync the database, force:true will drop the table if it exists
+  .sync({  }) // Sync the database, force:true will drop the table if it exists
   .then(result => {
     console.log('Database synced successfully');
     app.listen(3000, () => {

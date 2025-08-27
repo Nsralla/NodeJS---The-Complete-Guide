@@ -163,3 +163,24 @@ input[type="hidden"] {
     margin-bottom: 0;
     border-top: 1px solid #eee;
 }
+
+.pagination{
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.pagination a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    border: 1px solid #3498db;
+    border-radius: 4px;
+    color: #3498db;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: #3498db;
+    color: white;
+}

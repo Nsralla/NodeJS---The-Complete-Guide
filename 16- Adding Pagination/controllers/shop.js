@@ -2,53 +2,86 @@ const Product = require('../models/product'); // Import Product model
 const Cart = require('../models/cart'); // Import Cart model
 const Order = require('../models/order'); // Import Order model
 
-exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the url must match exactly
-    // send products to the shop page
+const PRODUCTS_PER_PAGE = 2;
+exports.getShowProducts = async (req, res, next) => { // get doesn't act like use, the url must match exactly
+    
     // fetch all products for the current user
-    Product.findAll({ where: { userId: req.session.userId } })
-        .then((products) => {
-            const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
-            res.render('shop/product-list', {
-                products: plainProducts,
-                pageTitle: 'Shop',
-                hasProducts: plainProducts.length > 0,
-                productCss: true,
-                formCss: 'add-product.css',
-                currentPage: 'products',
-                isAuthenticated: req.session.isLoggedIn
-            });
-        })
-        .catch(err => {
-            const error = new Error('AN ERROR OCCURED WHILE FETCHING PRODUCTS');
-            error.originalMessage = err.message;
-            error.statusCode = 500;
-            return next(error);
-        });
-};
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    if(isNaN(page) || page < 1) page = 1;
+    try{
+        const totalProducts = await Product.findAndCountAll({
+            offset: (page - 1) * PRODUCTS_PER_PAGE,
+            limit: PRODUCTS_PER_PAGE,
+            where: { userId: req.session.userId
+            }});
+        const plainProducts = totalProducts.rows.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
+        const totalPages = Math.ceil(totalProducts.count / PRODUCTS_PER_PAGE);  
+        if(page > totalPages && totalPages > 0) page = totalPages; // if requested page exceeds total pages, set to last page
 
-exports.getIndexPage = (req, res, next) => {
+        res.render('shop/product-list', {
+            products: plainProducts,
+            pageTitle: 'Shop',
+            hasProducts: plainProducts.length > 0,
+            productCss: true,
+            formCss: 'add-product.css',
+            currentPage: 'products',
+            isAuthenticated: req.session.isLoggedIn,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1,
+            nextPage: page < totalPages ? page + 1 : null,
+            previousPage: page > 1 ? page - 1 : null,
+            lastPage: totalPages,
+            currentPage: page
+    });
+    }catch(err){
+        const error = new Error('AN ERROR OCCURED WHILE FETCHING PRODUCTS');
+        error.originalMessage = err.message;
+        error.statusCode = 500;
+        return next(error);
+    }
+ }
+
+
+
+exports.getIndexPage = async (req, res, next) => {
+
+    let page = req.query.page ? parseInt(req.query.page) : 1;
+    if(isNaN(page) || page < 1) page = 1;
     const isAuthenticated = req.session.isLoggedIn === true; // === true ensures real boolean
 
-    Product.findAll()
-        .then((products) => {
-            const plainProducts = products.map(product => product.toJSON());
-            res.render('shop/index', {
-                pageTitle: 'Home page',
-                products: plainProducts,
-                hasProducts: plainProducts.length > 0,
-                currentPage: 'index',
-                productCss: true,
-                isAuthenticated // boolean true or false
-            });
-        })
-        .catch(err => {
-            const error = new Error('AN ERROR OCCURED WHILE FETCHING PRODUCTS');
-            error.originalMessage = err.message;
-            error.statusCode = 500;
-            return next(error);
+    try{
+        // FETCH PRODUCTS AND THEIR COUNT
+        const totalProducts = await Product.findAndCountAll({
+             offset: (page - 1) * PRODUCTS_PER_PAGE,
+            limit: PRODUCTS_PER_PAGE,
         });
-};
+        const totalPages = Math.ceil(totalProducts.count / PRODUCTS_PER_PAGE);
+        if(page > totalPages && totalPages > 0) page = totalPages; // if requested page exceeds total pages, set to last page
+ 
+      
+        const plainProducts = totalProducts.rows.map(product => product.toJSON());
+                res.render('shop/index', {
+                    pageTitle: 'Home page',
+                    products: plainProducts,
+                    hasProducts: plainProducts.length > 0,
+                    currentPage: 'index',
+                    productCss: true,
+                    hasNextPage: page < totalPages,
+                    hasPreviousPage: page > 1,
+                    nextPage: page < totalPages ? page + 1 : null,
+                    previousPage: page > 1 ? page - 1 : null,
+                    lastPage: totalPages,
+                    currentPage: page,
+                    isAuthenticated // boolean true or false
+                });
 
+            }catch(err){
+                const error = new Error('AN ERROR OCCURED WHILE FETCHING PRODUCTS');
+                error.originalMessage = err.message;
+                error.statusCode = 500;
+            return next(error);
+        }
+}
 
 
 exports.getCart = (req, res, next) => {
