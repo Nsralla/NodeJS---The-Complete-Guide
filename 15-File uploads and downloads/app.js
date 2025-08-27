@@ -130,7 +130,9 @@ app.use((req, res, next) => {
 
 
 app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken(); // Make CSRF token available in templates
+  const token = req.csrfToken();
+  console.log('CSRF token issued for view:', token);
+  res.locals.csrfToken = token; // Make CSRF token available in templates
   res.locals.isAuthenticated = req.session.isLoggedIn;  // Make isAuthenticated available in templates
   next();
 });

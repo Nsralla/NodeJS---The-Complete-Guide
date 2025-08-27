@@ -14,7 +14,8 @@ router.get('/cart', isAuth, shopController.getCart);
 router.post('/cart', isAuth, shopController.postCart);  // add product to cart
 router.post('/cart/delete/:productId', isAuth, shopController.deleteProductFromCart); // DELETE request to remove product from cart
 router.get('/orders', isAuth, shopController.getOrders);
-
+router.get("/orders/:orderId", isAuth, shopController.viewInvoice);
+router.get("/orders/download/:orderId", isAuth, shopController.downloadInvoice); // New route for downloading invoice
 // router.get('/checkout', shopController.getCheckout);
 router.post('/create-order', isAuth, shopController.postOrder);
 

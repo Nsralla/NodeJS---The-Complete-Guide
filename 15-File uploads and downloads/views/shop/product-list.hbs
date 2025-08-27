@@ -20,7 +20,7 @@
                 <p>{{this.description}}</p>
                 <img src="/uploads/{{this.imageUrl}}" alt="{{this.title}}">
                 <p>Price: ${{this.price}}</p>
-                {{#if isAuthenticated}}
+                {{#if ../isAuthenticated}}
                   <form class="product-details__cart-form" action="/cart" method="POST">
                     <input type="hidden" name="_csrf" value="{{csrfToken}}">
                     <button class="btn product-details__cart-btn" type="submit">Add to Cart</button>

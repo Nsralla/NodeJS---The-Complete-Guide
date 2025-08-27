@@ -5,7 +5,7 @@ const Order = require('../models/order'); // Import Order model
 exports.getShowProducts = (req, res, next) => { // get doesn't act like use, the url must match exactly
     // send products to the shop page
     // fetch all products for the current user
-    Product.findAll({where:{ userId: req.session.userId}})
+    Product.findAll({ where: { userId: req.session.userId } })
         .then((products) => {
             const plainProducts = products.map(product => product.toJSON()); // Convert Sequelize instances to plain objects
             res.render('shop/product-list', {
@@ -56,19 +56,20 @@ exports.getCart = (req, res, next) => {
         .then(cart => {
             if (!cart) {
                 return res.render('shop/cart', {
-                pageTitle: 'Your Cart',
-                currentPage: 'cart',
-                cartCss: true,
-                isAuthenticated: req.session.isLoggedIn,
-                isCartEmpty: true
-            }); 
+                    pageTitle: 'Your Cart',
+                    currentPage: 'cart',
+                    cartCss: true,
+                    isAuthenticated: req.session.isLoggedIn,
+                    isCartEmpty: true,
+                    // csrfToken: req.csrfToken()
+                });
             }
             return cart.getProducts({
                 through: { attributes: ['quantity'] } // include quantity from CartItem
             });
         })
         .then(products => {
-            if(!products)
+            if (!products)
                 return null;
             if (products.length === 0) {
                 return res.render('shop/cart', {
@@ -77,7 +78,8 @@ exports.getCart = (req, res, next) => {
                     totalPrice: 0,
                     currentPage: 'cart',
                     cartCss: true,
-                    isAuthenticated: req.session.isLoggedIn
+                    isAuthenticated: req.session.isLoggedIn,
+                    // csrfToken: req.csrfToken()
                 });
             }
 
@@ -97,7 +99,8 @@ exports.getCart = (req, res, next) => {
                 totalPrice: totalPrice,
                 currentPage: 'cart',
                 cartCss: true,
-                isAuthenticated: req.session.isLoggedIn
+                isAuthenticated: req.session.isLoggedIn,
+                // csrfToken: req.csrfToken()
             });
         })
         .catch(err => {
@@ -191,9 +194,9 @@ exports.getProductDetails = (req, res, next) => {
         .then((product) => {
             const plainProduct = product.toJSON();
             if (!product) {
-               const error = new Error("Product not found");
-               error.statusCode = 404; // Not Found
-               return next(error);
+                const error = new Error("Product not found");
+                error.statusCode = 404; // Not Found
+                return next(error);
             }
             res.render('shop/product-details', {
                 product: plainProduct,
@@ -324,6 +327,241 @@ exports.getOrders = (req, res, next) => {
         })
         .catch(err => {
             const error = new Error('AN ERROR OCCURED WHILE FETCHING ORDERS');
+            error.originalMessage = err.message;
+            error.statusCode = 500;
+            return next(error);
+        });
+};
+
+exports.viewInvoice = async (req, res, next) => {
+    const orderId = req.params.orderId;
+    const fs = require('fs');
+    const path = require('path');
+    const PDFDocument = require('pdfkit');
+    const fsExtra = require('fs-extra');
+
+    try {
+        // 1. Verify order exists and belongs to the current user
+        const order = await Order.findByPk(orderId);
+        if (!order) {
+            return res.status(404).render('404', {
+                pageTitle: 'Order Not Found',
+                currentPage: 'error'
+            });
+        }
+
+        if (order.userId !== req.user.id) {
+            return res.status(403).render('403', {
+                pageTitle: 'Forbidden',
+                currentPage: 'error'
+            });
+        }
+
+        // 2. Ensure invoices directory exists
+        const invoicesDir = path.join('data', 'invoices');
+        fsExtra.ensureDirSync(invoicesDir);
+
+        const invoiceName = `invoice-${orderId}.pdf`;
+        const invoicePath = path.join(invoicesDir, invoiceName);
+
+        // 3. If invoice already exists, stream it
+        if (fs.existsSync(invoicePath)) {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+            return fs.createReadStream(invoicePath).pipe(res);
+        }
+
+        // 4. Fetch order with products
+        const orders = await req.user.getOrders({
+            where: { id: orderId },
+            include: ['products']
+        });
+
+        if (!orders || orders.length === 0) {
+            return res.status(404).render('404', {
+                pageTitle: 'Order Not Found',
+                currentPage: 'error'
+            });
+        }
+
+        const fullOrder = orders[0].toJSON();
+
+        if (fullOrder.products) {
+            fullOrder.products = fullOrder.products.map(product => {
+                product.quantity = product.orderItem.quantity;
+                return product;
+            });
+        }
+
+        // 5. Create PDF document
+        const pdfDoc = new PDFDocument();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+
+        pdfDoc.pipe(fs.createWriteStream(invoicePath));
+        pdfDoc.pipe(res);
+
+        pdfDoc.fontSize(26).text('Invoice', {
+            underline: true,
+            align: 'center'
+        });
+
+        pdfDoc.moveDown();
+        pdfDoc.fontSize(14).text(`Order #: ${orderId}`);
+        pdfDoc.moveDown();
+
+        // Table header
+        pdfDoc.fontSize(12);
+        pdfDoc.text('Product', 50, pdfDoc.y, { width: 250, continued: true });
+        pdfDoc.text('Quantity', 300, pdfDoc.y, { width: 80, continued: true });
+        pdfDoc.text('Price', 380, pdfDoc.y, { width: 80, continued: true });
+        pdfDoc.text('Total', 460, pdfDoc.y);
+
+        pdfDoc.moveDown();
+        let totalPrice = 0;
+
+        // Products
+        for (const product of fullOrder.products) {
+            const productTotal = product.price * product.quantity;
+            totalPrice += productTotal;
+
+            pdfDoc.text(product.title, 50, pdfDoc.y, { width: 250, continued: true });
+            pdfDoc.text(product.quantity.toString(), 300, pdfDoc.y, { width: 80, continued: true });
+            pdfDoc.text(`$${product.price.toFixed(2)}`, 380, pdfDoc.y, { width: 80, continued: true });
+            pdfDoc.text(`$${productTotal.toFixed(2)}`, 460, pdfDoc.y);
+            pdfDoc.moveDown();
+        }
+
+        pdfDoc.moveDown();
+        pdfDoc.fontSize(14).text(`Total Amount: $${totalPrice.toFixed(2)}`, { align: 'right' });
+
+        pdfDoc.end();
+    } catch (err) {
+        const error = new Error('AN ERROR OCCURED WHILE GENERATING INVOICE');
+        error.originalMessage = err.message;
+        error.statusCode = 500;
+        return next(error);
+    }
+};
+
+
+exports.downloadInvoice = (req, res, next) => {
+    const orderId = req.params.orderId;
+    const fs = require('fs');
+    const path = require('path');
+    const PDFDocument = require('pdfkit');
+    const fsExtra = require('fs-extra');
+
+    // First, verify that the order exists and belongs to the current user
+    Order.findByPk(orderId)
+        .then(order => {
+            if (!order) {
+                return res.status(404).render('404', {
+                    pageTitle: 'Order Not Found',
+                    currentPage: 'error'
+                });
+            }
+            if (order.userId !== req.user.id) {
+                return res.status(403).render('403', {
+                    pageTitle: 'Forbidden',
+                    currentPage: 'error'
+                });
+            }
+
+            // Order exists and belongs to current user, proceed with invoice generation
+            // Ensure the invoices directory exists
+            const invoicesDir = path.join('data', 'invoices');
+            fsExtra.ensureDirSync(invoicesDir);
+
+            const invoiceName = 'invoice-' + orderId + '.pdf';
+            const invoicePath = path.join(invoicesDir, invoiceName);
+
+            // Check if invoice already exists
+            if (fs.existsSync(invoicePath)) {
+                // If it exists, serve the file
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"');
+                return fs.createReadStream(invoicePath).pipe(res);
+            }
+
+            // Invoice doesn't exist yet, generate it
+            return req.user.getOrders({
+                where: { id: orderId },
+                include: ['products']
+            })
+                .then(orders => {
+                    if (!orders || orders.length === 0) {
+                        return res.status(404).render('404', {
+                            pageTitle: 'Order Not Found',
+                            currentPage: 'error'
+                        });
+                    }
+
+                    const order = orders[0];
+                    const plainOrder = order.toJSON();
+
+                    // Process products to include quantity from OrderItem
+                    if (plainOrder.products) {
+                        plainOrder.products = plainOrder.products.map(product => {
+                            product.quantity = product.orderItem.quantity;
+                            return product;
+                        });
+                    }
+
+                    // Create PDF document
+                    const pdfDoc = new PDFDocument();
+                    res.setHeader('Content-Type', 'application/pdf');
+                    res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"');
+
+                    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+                    pdfDoc.pipe(res);
+
+                    // Add content to the PDF
+                    pdfDoc.fontSize(26).text('Invoice', {
+                        underline: true,
+                        align: 'center'
+                    });
+
+                    pdfDoc.moveDown();
+                    pdfDoc.fontSize(14).text('Order #: ' + orderId);
+                    pdfDoc.moveDown();
+
+                    // Add table header
+                    pdfDoc.fontSize(12);
+                    pdfDoc.text('Product', 50, pdfDoc.y, { width: 250, continued: true });
+                    pdfDoc.text('Quantity', 300, pdfDoc.y, { width: 80, continued: true });
+                    pdfDoc.text('Price', 380, pdfDoc.y, { width: 80, continued: true });
+                    pdfDoc.text('Total', 460, pdfDoc.y);
+
+                    pdfDoc.moveDown();
+                    let totalPrice = 0;
+
+                    // Add products
+                    plainOrder.products.forEach(product => {
+                        const productTotal = product.price * product.quantity;
+                        totalPrice += productTotal;
+
+                        pdfDoc.text(product.title, 50, pdfDoc.y, { width: 250, continued: true });
+                        pdfDoc.text(product.quantity.toString(), 300, pdfDoc.y, { width: 80, continued: true });
+                        pdfDoc.text('$' + product.price.toFixed(2), 380, pdfDoc.y, { width: 80, continued: true });
+                        pdfDoc.text('$' + productTotal.toFixed(2), 460, pdfDoc.y);
+                        pdfDoc.moveDown();
+                    });
+
+                    pdfDoc.moveDown();
+                    pdfDoc.fontSize(14).text('Total Amount: $' + totalPrice.toFixed(2), { align: 'right' });
+
+                    pdfDoc.end();
+                })
+                .catch(err => {
+                    const error = new Error('AN ERROR OCCURED WHILE GENERATING INVOICE');
+                    error.originalMessage = err.message;
+                    error.statusCode = 500;
+                    return next(error);
+                });
+        })
+        .catch(err => {
+            const error = new Error('AN ERROR OCCURED WHILE FETCHING ORDER');
             error.originalMessage = err.message;
             error.statusCode = 500;
             return next(error);
