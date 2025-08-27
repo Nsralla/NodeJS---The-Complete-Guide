@@ -1,0 +1,29 @@
+<div class="cart-container">
+  {{#if products}}
+  <h1 class="cart-title">Your Cart</h1>
+  <h3>Total Price: ${{totalPrice}}</h3>
+
+  <ul class="cart-items">
+    {{#each products}}
+    <li class="cart-item">
+      <h2 class="cart-item__title">{{this.title}}</h2>
+      <img class="cart-item__image" src="/uploads/{{this.imageUrl}}" alt="{{this.title}}">
+      <p class="cart-item__price">Price: ${{this.price}}</p>
+      <p class="cart-item__quantity">Quantity: {{this.quantity}}</p>
+      <form class="cart-item__form" action="/cart/delete/{{this.id}}" method="POST">
+        <input type="hidden" name="_csrf" value="{{../csrfToken}}">
+        <button class="btn cart-item__remove-btn" type="submit">Remove from Cart</button>
+      </form>
+    </li>
+    {{/each}}
+  </ul>
+
+  <form action="/create-order" method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    <button class="cart-checkout-btn" type="submit">Order now</button>
+  </form>
+
+  {{else}}
+  <p class="cart-empty-message">Your cart is empty.</p>
+  {{/if}}
+</div>
