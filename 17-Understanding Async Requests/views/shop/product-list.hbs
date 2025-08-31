@@ -1,0 +1,48 @@
+
+       <h1> My products</h1>
+       {{#if hasProducts}}
+           <br>
+       {{else}}
+           <p>No products found. Please add some products.</p>
+       {{/if}}
+       
+       {{#if errorMessage}}
+           <p class="error">{{errorMessage}}</p>
+       {{/if}}
+
+       {{#if successMessage}}
+           <p class="success">{{successMessage}}</p>
+       {{/if}}
+       <ul class="product-list">
+           {{#each products}}
+               <li>
+                <h2>{{this.title}}</h2>
+                <p>{{this.description}}</p>
+                <img src="/uploads/{{this.imageUrl}}" alt="{{this.title}}">
+                <p>Price: ${{this.price}}</p>
+                {{#if ../isAuthenticated}}
+                  <form class="product-details__cart-form" action="/cart" method="POST">
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                    <button class="btn product-details__cart-btn" type="submit">Add to Cart</button>
+                    <input type="hidden" name="productId" value="{{this.id}}">
+                </form>
+                {{else}}
+                <p> you must be logged in </p>
+                {{/if}}
+                <a href="/products/{{this.id}}">Details</a>
+               </li>
+           {{/each}}
+       </ul>
+
+{{!-- display pagination dynamically --}}
+{{#if hasProducts}}
+<section class="pagination">
+    {{#if hasPreviousPage}}
+    <a href="/?page={{previousPage}}">Previous</a>
+    {{/if}}
+    <span>Page {{currentPage}} of {{lastPage}}</span>
+    {{#if hasNextPage}}
+    <a href="/?page={{nextPage}}">Next</a>
+    {{/if}}
+</section>
+{{/if}}

@@ -1,0 +1,48 @@
+<h1> My products</h1>
+{{#if hasProducts}}
+<br>
+{{else}}
+<p>No products found. Please add some products.</p>
+{{/if}}
+
+{{#if errorMessage}}
+<p class="error">{{errorMessage}}</p>
+{{/if}}
+
+{{#if successMessage}}
+<p class="success">{{successMessage}}</p>
+{{/if}}
+<ul class="product-list">
+    {{#each products}}
+    <li>
+        <h2>{{this.title}}</h2>
+        <p>{{this.description}}</p>
+        <img src="/uploads/{{this.imageUrl}}" alt="{{this.title}}">
+        <p>Price: ${{this.price}}</p>
+        <form action="/admin/edit-product/{{this.id}}" method="GET">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+            <button type="submit">Edit</button>
+        </form>
+        <input type="hidden" name="_csrf" value="{{../csrfToken}}">
+        <button type="button" class="delete-btn" data-id="{{this.id}}" data-csrf="{{../csrfToken}}">Delete</button>
+{{!--Some options:
+
+data-id (common, straightforward)
+data-product-id (more specific)
+data-pid (shorter)
+In JavaScript, you would access them like:
+
+data-id → element.dataset.id
+data-product-id → element.dataset.productId
+I recommend:
+
+Use data-id if it's a generic identifier
+Use a more specific name (like data-product-id) when you have different types of IDs
+Be consistent throughout your application
+Your current approach with data-id is perfectly fine and follows common conventions.  --}}
+    </li>
+
+    {{/each}}
+</ul>
+
+<script src="/js/admin.js"></script>

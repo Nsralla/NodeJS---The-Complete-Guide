@@ -1,0 +1,54 @@
+<div class="orders-container">
+    <h1 class="orders-title">Your Orders</h1>
+
+    {{#if orders.length}}
+    <ul class="orders-list">
+        {{#each orders}}
+        <li class="order-item">
+            <div class="order-header">
+                <h2 class="order-id">Order #{{id}}</h2>
+                <p class="order-date">{{createdAt}}</p>
+            </div>
+
+            <h3 class="products-title">Products Ordered:</h3>
+
+            {{#if products.length}}
+            <ul class="products-list">
+                {{#each products}}
+                <li class="product-item">
+                    {{#if imageUrl}}
+                    <img class="product-image" src="/uploads/{{imageUrl}}" alt="{{title}}">
+                    {{else}}
+                    <div class="product-image"
+                        style="background: #e9ecef; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        📦</div>
+                    {{/if}}
+
+                    <div class="product-details">
+                        <h4 class="product-title">{{title}}</h4>
+                    </div>
+
+                    <div class="product-quantity">
+                        Qty: {{quantity}}
+                    </div>
+
+                    <div class="product-price">
+                        ${{price}}
+                    </div>
+                    <div class="invoice-links">
+                        <a href="/orders/{{../id}}" target="_blank">View Invoice</a> |
+                        <a href="/orders/download/{{../id}}">Download Invoice</a>
+                    </div>
+                </li>
+                {{/each}}
+            </ul>
+            {{else}}
+            <p class="no-products-message">No products in this order.</p>
+            {{/if}}
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p class="no-orders-message">No orders found. Start shopping to create your first order!</p>
+    {{/if}}
+</div>
