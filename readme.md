@@ -77,12 +77,10 @@ npm install --save bcryptjs
 
 1. **Clone** the repo  
    ```bash
-   git clone https://github.com/your-handle/node-trail-labs.git
+   git clone [ https://github.com/your-handle/node-trail-labs.git](https://github.com/Nsralla/NodeJS-The-Complete-Guide.git)
    cd node-trail-labs
-
-## 🚀  Getting started
-
-1. **Clone** the repo  
-   ```bash
-   git clone https://github.com/your-handle/node-trail-labs.git
-   cd node-trail-labs
+   ```
+2. **Run any of the folders**
+   ``` bash
+   npx nodemon "name of the folder/app.js"
+   ```
